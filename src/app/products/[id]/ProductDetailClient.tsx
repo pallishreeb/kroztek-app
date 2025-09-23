@@ -11,7 +11,8 @@ type Props = {
 
 export default function ProductDetailClient({ product }: Props) {
   const [quantity, setQuantity] = useState(1);
-const { addToCart: addToCartContext } = useCart();
+  const { addToCart: addToCartContext } = useCart();
+  
   const categoryMap: Record<string, string> = {
     vsx: "VSX",
     m20: "M20 Shaft Power",
@@ -22,7 +23,7 @@ const { addToCart: addToCartContext } = useCart();
   const categoryName = product.category ? categoryMap[product.category] : "All Products";
 
   const handleAddToCart = () => {
-    addToCartContext(product, quantity); // 🔑 update context (also updates localStorage inside context)
+    addToCartContext(product, quantity);
     alert(`${product.name} added to cart!`);
   };
 
@@ -47,7 +48,7 @@ const { addToCart: addToCartContext } = useCart();
         </ol>
       </nav>
 
-      {/* Product Grid - Existing section */}
+      {/* Product Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Image */}
         <div>
@@ -64,7 +65,7 @@ const { addToCart: addToCartContext } = useCart();
           <p className="text-xl text-indigo-600 mt-2">{product.price} {product.gst}</p>
 
           {/* Technical Details */}
-          <ul className="mt-4 text-gray-700">
+          <ul className="mt-4 text-gray-700 space-y-1">
             {product.series && <li><strong>Make:</strong> {product.series}</li>}
             {product.series && <li><strong>Series:</strong> {product.series}</li>}
             {product.model && <li><strong>Model:</strong> {product.model}</li>}
@@ -76,7 +77,7 @@ const { addToCart: addToCartContext } = useCart();
           </ul>
 
           {/* Features */}
-          {product.features && (
+          {product.features && product.features.length > 0 && (
             <div className="mt-4">
               <h2 className="font-semibold">Features</h2>
               <ul className="list-disc ml-5 text-gray-700">
@@ -92,42 +93,44 @@ const { addToCart: addToCartContext } = useCart();
             <input
               type="number"
               value={quantity}
-              onChange={(e) => setQuantity(Number(e.target.value))}
-              defaultValue={1}
+              onChange={(e) => setQuantity(Math.max(1, Number(e.target.value)))}
               min={1}
-              className="border px-3 py-2 w-20 rounded"
+              className="border px-3 py-2 w-20 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
             <button 
-            onClick={handleAddToCart}
-            className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
+              onClick={handleAddToCart}
+              className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition-colors"
+            >
               Add to Cart
             </button>
           </div>
 
           {/* SKU, Categories, Tags */}
-          <div className="mt-4 text-gray-600">
+          <div className="mt-4 text-gray-600 space-y-1">
             {product.sku && <p><strong>SKU:</strong> {product.sku}</p>}
             <p><strong>Categories:</strong> CG Emotron, {product.series}</p>
-            {product.tags && <p><strong>Tags:</strong> {product.tags.join(", ")}</p>}
+            {product.tags && product.tags.length > 0 && (
+              <p><strong>Tags:</strong> {product.tags.join(", ")}</p>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Additional Detailed Section - Extended info */}
-      <div className="mt-12 space-y-6">
+      {/* Additional Detailed Section */}
+      <div className="mt-12 space-y-8">
         {/* Product Overview */}
         {product.description && (
-          <section>
-            <h2 className="text-xl font-semibold mb-2">Product Overview</h2>
-            <p className="text-gray-700">{product.description}</p>
+          <section className="bg-gray-50 p-6 rounded-lg">
+            <h2 className="text-xl font-semibold mb-4 text-gray-900">Product Overview</h2>
+            <p className="text-gray-700 leading-relaxed">{product.description}</p>
           </section>
         )}
 
         {/* Features */}
-        {product.features?.length > 0 && (
-          <section>
-            <h2 className="text-xl font-semibold mb-2">Key Features</h2>
-            <ul className="list-disc ml-5 text-gray-700">
+        {product.features && product.features.length > 0 && (
+          <section className="bg-white border border-gray-200 p-6 rounded-lg">
+            <h2 className="text-xl font-semibold mb-4 text-gray-900">Key Features</h2>
+            <ul className="list-disc ml-5 text-gray-700 space-y-2">
               {product.features.map((f, idx) => (
                 <li key={idx}>{f}</li>
               ))}
@@ -136,10 +139,10 @@ const { addToCart: addToCartContext } = useCart();
         )}
 
         {/* Benefits */}
-        {product.benefits?.length > 0 && (
-          <section>
-            <h2 className="text-xl font-semibold mb-2">Benefits</h2>
-            <ul className="list-disc ml-5 text-gray-700">
+        {product.benefits && product.benefits.length > 0 && (
+          <section className="bg-green-50 p-6 rounded-lg">
+            <h2 className="text-xl font-semibold mb-4 text-gray-900">Benefits</h2>
+            <ul className="list-disc ml-5 text-gray-700 space-y-2">
               {product.benefits.map((b, idx) => (
                 <li key={idx}>{b}</li>
               ))}
@@ -148,27 +151,35 @@ const { addToCart: addToCartContext } = useCart();
         )}
 
         {/* Technical Specs Table */}
-        {product.technicalSpecs?.length > 0 && (
-          <section>
-            <h2 className="text-xl font-semibold mb-2">Technical Specifications</h2>
-            <table className="min-w-full border border-gray-300 text-gray-700">
-              <tbody>
-                {product.technicalSpecs.map((spec, idx) => (
-                  <tr key={idx} className="border-b border-gray-300">
-                    <td className="px-4 py-2 font-semibold">{spec.parameter}</td>
-                    <td className="px-4 py-2">{spec.specification}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        {product.technicalSpecs && product.technicalSpecs.length > 0 && (
+          <section className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+            <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+              <h2 className="text-xl font-semibold text-gray-900">Technical Specifications</h2>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full">
+                <tbody className="divide-y divide-gray-200">
+                  {product.technicalSpecs.map((spec, idx) => (
+                    <tr key={idx} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 font-semibold text-gray-900 bg-gray-50">
+                        {spec.parameter}
+                      </td>
+                      <td className="px-6 py-4 text-gray-700">
+                        {spec.specification}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </section>
         )}
 
         {/* Series Range */}
-        {product.seriesRange?.length > 0 && (
-          <section>
-            <h2 className="text-xl font-semibold mb-2">Series Range</h2>
-            <ul className="list-disc ml-5 text-gray-700">
+        {product.seriesRange && product.seriesRange.length > 0 && (
+          <section className="bg-blue-50 p-6 rounded-lg">
+            <h2 className="text-xl font-semibold mb-4 text-gray-900">Series Range</h2>
+            <ul className="list-disc ml-5 text-gray-700 space-y-2">
               {product.seriesRange.map((s, idx) => (
                 <li key={idx}>{s}</li>
               ))}
@@ -177,10 +188,10 @@ const { addToCart: addToCartContext } = useCart();
         )}
 
         {/* Applications */}
-        {product.applications?.length > 0 && (
-          <section>
-            <h2 className="text-xl font-semibold mb-2">Applications</h2>
-            <ul className="list-disc ml-5 text-gray-700">
+        {product.applications && product.applications.length > 0 && (
+          <section className="bg-purple-50 p-6 rounded-lg">
+            <h2 className="text-xl font-semibold mb-4 text-gray-900">Applications</h2>
+            <ul className="list-disc ml-5 text-gray-700 space-y-2">
               {product.applications.map((a, idx) => (
                 <li key={idx}>{a}</li>
               ))}
