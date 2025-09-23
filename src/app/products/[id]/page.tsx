@@ -7,8 +7,8 @@ interface ProductDetailPageProps {
   searchParams?: { [key: string]: string | string[] | undefined };
 }
 
-export default function ProductDetailPage({ params }: ProductDetailPageProps) {
-  const { id } = params;
+export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
+  const { id } = await params;
 
   // Find the product by ID
   const product: Product | undefined = products.find((p) => p.id === id);
