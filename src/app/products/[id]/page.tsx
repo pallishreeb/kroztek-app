@@ -3,14 +3,13 @@ import ProductDetailClient from "./ProductDetailClient";
 
 interface ProductDetailPageProps {
   params: { id: string };
-  // Optional searchParams if you need them
   searchParams?: { [key: string]: string | string[] | undefined };
 }
 
-export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
-  const { id } = await params;
+// Do NOT make this async unless you fetch from API
+export default function ProductDetailPage({ params }: ProductDetailPageProps) {
+  const { id } = params; // Just destructure — no await!
 
-  // Find the product by ID
   const product: Product | undefined = products.find((p) => p.id === id);
 
   if (!product) {
