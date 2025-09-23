@@ -1,0 +1,82 @@
+[
+  {
+    "slug": "eliminated-unauthorized-access",
+    "hero": {
+      "backgroundImage": "https://api.builder.io/api/v1/image/assets/TEMP/ab10950e41ead24bff21209ad5685642d20cd80d?width=2896",
+      "heading": "How IDR Eliminated Unauthorized Building Access for Fairstead.",
+      "paragraph": "Fairstead, a leading national property management firm, partnered with IDR to address a widespread security concern across 42 buildings in their Sunset Park portfolio. Residents were duplicating their proximity fobs at retail stores and handing them off to unauthorized individuals — leading to serious safety and liability concerns for the property owner."
+    },
+    "galleryImages": [
+      {
+        "src": "/assets/case_study/case-study-1.png",
+        "alt": "Access control system 1"
+      },
+      {
+        "src": "/assets/case_study/case-study-2.png",
+        "alt": "Access control system 2"
+      },
+      {
+        "src": "/assets/case_study/case-study-3.png",
+        "alt": "Access control system 3"
+      }
+    ],
+    "content": {
+      "title": "Challenge",
+      "description": "Residents were duplicating fobs at retail stores and distributing them to unauthorized individuals, creating serious security vulnerabilities across the property portfolio.",
+      "client": "Fairstead",
+      "property": "Sunset Park (42 Buildings)",
+      "challenge": "Unauthorized fob duplication was allowing drug activity and non-residential access",
+      "solution": "High-Security Access Control Retrofit"
+    },
+    "cards": [
+      {
+        "title": "42 Buildings",
+        "description": "Secured across the Sunset Park portfolio."
+      },
+      {
+        "title": "Zero Breaches",
+        "description": "Since implementing IDR systems."
+      }
+    ]
+  },
+  {
+    "slug": "cloud-4-wire-intercoms",
+    "hero": {
+      "backgroundImage": "https://example.com/bg2.jpg",
+      "heading": "Cloud + 4-Wire Intercoms Integration at Scale",
+      "paragraph": "We enabled seamless communication across 10,000+ units with our innovative cloud-based intercom solution that integrates with existing 4-wire infrastructure."
+    },
+    "galleryImages": [
+      {
+        "src": "/case_study/case-study-1.png",
+        "alt": "Cloud intercom system 1"
+      },
+      {
+        "src": "/case_study/case-study-2.png",
+        "alt": "Cloud intercom system 2"
+      },
+      {
+        "src": "/case_study/case-study-3.png",
+        "alt": "Cloud intercom system 3"
+      }
+    ],
+    "content": {
+      "title": "Challenge",
+      "description": "Legacy 4-wire intercom systems needed modernization without complete infrastructure replacement, requiring innovative cloud integration solutions.",
+      "client": "Chocolate Factory Brooklyn",
+      "property": "Mixed-use Development",
+      "challenge": "Legacy 4-wire intercom systems needed modernization",
+      "solution": "Cloud-based Integration System"
+    },
+    "cards": [
+      {
+        "title": "10,000+ Units",
+        "description": "Successfully integrated across multiple properties."
+      },
+      {
+        "title": "50% Cost Savings",
+        "description": "Compared to full system replacement."
+      }
+    ]
+  }
+]

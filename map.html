@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IDR Interactive Map</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        .page-title {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .map_wrapper {
+            margin: 0 auto;
+            max-width: 2000px;
+        }
+        .map_box {
+            width: 100%;
+        }
+        .map_aspect_ratio {
+            position: relative;
+            padding-top: 50%;
+        }
+        .map_container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .map_render {
+            width: 100%;
+            height: 100%;
+        }
+        @media (max-width: 768px) {
+            .map_aspect_ratio {
+                padding-top: 75%;
+            }
+        }
+        
+        .legend {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+        .legend-box {
+            display: flex;
+            align-items: center;
+            background: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 0 12px;
+        }
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+            margin-right: 8px;
+        }
+        .legend-text {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+        }
+    </style>
+    <!-- AmCharts Resources -->
+    <script src="https://cdn.amcharts.com/lib/version/4.10.29/core.js"></script>
+    <script src="https://cdn.amcharts.com/lib/version/4.10.29/maps.js"></script>
+    <script src="https://cdn.amcharts.com/lib/version/4.10.29/themes/animated.js"></script>
+    <script src="https://cdn.amcharts.com/lib/4/geodata/usaHigh.js"></script>
+</head>
+<body>
+    <h2 class="page-title">IDR provides services in all states shaded in blue</h2>
+    
+    <div class="legend">
+        <div class="legend-box">
+            <div class="legend-item">
+                <div class="legend-color" style="background: rgba(23,137,217,0.9);"></div>
+                <span class="legend-text">Service Available</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #CDCDCD;"></div>
+                <span class="legend-text">Other States</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="map_wrapper" id="map_wrapper_5180">
+        <div class="map_box">
+            <div class="map_aspect_ratio">
+                <div class="map_container">
+                    <div class="map_render" id="map_5180"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Enable animations
+        am4core.useTheme(am4themes_animated);
+
+        // Create map instance
+        var chart = am4core.create("map_5180", am4maps.MapChart);
+
+        // Set map definition
+        chart.geodata = am4geodata_usaHigh;
+
+        // Set projection
+        chart.projection = new am4maps.projections.AlbersUsa();
+
+        // Create map polygon series
+        var polygonSeries = chart.series.push(new am4maps.MapPolygonSeries());
+
+        // Remove Antarctica
+        polygonSeries.exclude = ["AQ"];
+
+        // Make map load polygon (state) data from GeoJSON
+        polygonSeries.useGeodata = true;
+
+        // Configure series
+        var polygonTemplate = polygonSeries.mapPolygons.template;
+        polygonTemplate.tooltipText = "{name}";
+        polygonTemplate.fill = am4core.color("#CDCDCD"); // Inactive state color (gray)
+
+        // Create hover state and set alternative fill color
+        var hs = polygonTemplate.states.create("hover");
+        hs.properties.fill = am4core.color("#CDCDCD");
+
+        // Create active state
+        var activeState = polygonTemplate.states.create("active");
+        activeState.properties.fill = am4core.color("rgba(23,137,217,0.9)");
+
+        // Create active states (blue colored states)
+        var activeStates = [
+            "US-CA",  // California
+            "US-UT",  // Utah
+            "US-AZ",  // Arizona
+            "US-TX",  // Texas
+            "US-AL",  // Alabama
+            "US-GA",  // Georgia
+            "US-FL",  // Florida
+            "US-NC",  // North Carolina
+            "US-VA",  // Virginia
+            "US-PA",  // Pennsylvania
+            "US-MD",  // Maryland
+            "US-NJ",  // New Jersey
+            "US-NY",  // New York
+            "US-RI",  // Rhode Island
+            "US-CT",  // Connecticut
+            "US-MA"   // Massachusetts
+        ];
+
+        // Set active states
+        polygonSeries.events.on("inited", function() {
+            polygonSeries.mapPolygons.each(function(polygon) {
+                if (activeStates.indexOf(polygon.dataItem.dataContext.id) !== -1) {
+                    polygon.setState("active");
+                }
+            });
+        });
+
+        // Add Washington DC marker
+        var cities = chart.series.push(new am4maps.MapImageSeries());
+        var city = cities.mapImages.template;
+        city.nonScaling = true;
+
+        var circle = city.createChild(am4core.Circle);
+        circle.fill = am4core.color("rgba(23,137,217,0.9)");
+        circle.stroke = am4core.color("#FFFFFF");
+        circle.strokeWidth = 2;
+        circle.radius = 10;
+        circle.tooltipText = "{title}";
+
+        city.propertyFields.latitude = "latitude";
+        city.propertyFields.longitude = "longitude";
+
+        cities.data = [{
+            "latitude": 38.257827,
+            "longitude": -75.989679,
+            "title": "Washington DC"
+        }];
+
+        // Set chart settings
+        chart.maxZoomLevel = 32;
+        chart.seriesContainer.draggable = false;
+        chart.seriesContainer.resizable = false;
+        chart.maxPanOut = 0;
+        chart.backgroundSeries.mapPolygons.template.polygon.fillOpacity = 0;
+        chart.background.fill = am4core.color("#ffffff");
+        chart.background.fillOpacity = 0;
+
+        // Remove zoom control
+        chart.zoomControl = new am4maps.ZoomControl();
+        chart.zoomControl.disabled = true;
+    </script>
+</body>
+</html>
