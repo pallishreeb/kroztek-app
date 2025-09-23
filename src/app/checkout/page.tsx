@@ -35,7 +35,7 @@ export default function CheckoutPage() {
   // Load billing email if user is logged in
   useEffect(() => {
     if (user?.email) {
-      setBilling((prev) => ({ ...prev, email: user.email }));
+      setBilling((prev) => ({ ...prev, email: user.email || "" })); // Fix: Handle null case
     }
   }, [user]);
 
@@ -97,7 +97,7 @@ const handleConfirmPayment = async () => {
         subject: "Order Confirmation - Kroztek",
         message: `
           <h2>Thank you for your order, ${billing.firstName}!</h2>
-          <p>We’ve received your order and will start processing soon.</p>
+          <p>We've received your order and will start processing soon.</p>
           
           <h3>Order Summary</h3>
           <table border="1" cellspacing="0" cellpadding="6">
@@ -153,6 +153,7 @@ const handleConfirmPayment = async () => {
             value={billing.firstName}
             onChange={handleBillingChange}
             className="border px-3 py-2 rounded w-full"
+            required
           />
           <input
             type="text"
@@ -161,6 +162,7 @@ const handleConfirmPayment = async () => {
             value={billing.lastName}
             onChange={handleBillingChange}
             className="border px-3 py-2 rounded w-full"
+            required
           />
         </div>
         <input
@@ -184,6 +186,7 @@ const handleConfirmPayment = async () => {
           value={billing.country}
           onChange={handleBillingChange}
           className="border px-3 py-2 rounded w-full"
+          required
         >
           <option value="">Select a country / region *</option>
           <option value="India">India</option>
@@ -195,6 +198,7 @@ const handleConfirmPayment = async () => {
           value={billing.address}
           onChange={handleBillingChange}
           className="border px-3 py-2 rounded w-full"
+          required
         />
         <input
           type="text"
@@ -203,6 +207,7 @@ const handleConfirmPayment = async () => {
           value={billing.city}
           onChange={handleBillingChange}
           className="border px-3 py-2 rounded w-full"
+          required
         />
         <input
           type="text"
@@ -211,6 +216,7 @@ const handleConfirmPayment = async () => {
           value={billing.state}
           onChange={handleBillingChange}
           className="border px-3 py-2 rounded w-full"
+          required
         />
         <input
           type="text"
@@ -219,14 +225,16 @@ const handleConfirmPayment = async () => {
           value={billing.zip}
           onChange={handleBillingChange}
           className="border px-3 py-2 rounded w-full"
+          required
         />
         <input
-          type="text"
+          type="tel"
           name="phone"
           placeholder="Phone *"
           value={billing.phone}
           onChange={handleBillingChange}
           className="border px-3 py-2 rounded w-full"
+          required
         />
         <input
           type="email"
@@ -235,6 +243,7 @@ const handleConfirmPayment = async () => {
           value={billing.email}
           onChange={handleBillingChange}
           className="border px-3 py-2 rounded w-full"
+          required
         />
         <textarea
           name="orderNotes"
@@ -242,6 +251,7 @@ const handleConfirmPayment = async () => {
           value={billing.orderNotes}
           onChange={handleBillingChange}
           className="border px-3 py-2 rounded w-full"
+          rows={4}
         />
       </div>
 
@@ -269,58 +279,64 @@ const handleConfirmPayment = async () => {
           <span>Enter your address to view shipping options.</span>
         </div>
         <div className="flex justify-between">
-          <span>Tax</span>
+          <span>Tax (GST 18%)</span>
           <span>₹{tax.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between font-semibold text-lg">
+        <div className="flex justify-between font-semibold text-lg border-t pt-2">
           <span>Total</span>
           <span>₹{total.toFixed(2)}</span>
         </div>
 
         {/* Payment Instructions */}
-        <div className="mt-4 space-y-2">
-          <h3 className="font-semibold">Pay with UPI</h3>
-          <p>STATE BANK OF INDIA
-KROZTEK INTEGRATED SOLUTION
-IFSC – SBIN0000068
-AC NO - 41936176103</p>
-          <p>Scan this QR code using any UPI app.</p>
-          <img src="/img/upi-qr-sample.png" alt="UPI QR Code" className="w-32 h-32 border rounded" />
-          <p>OR pay using UPI ID: <strong>kroztek@upi</strong></p>
+        <div className="mt-4 space-y-2 bg-blue-50 p-4 rounded">
+          <h3 className="font-semibold text-blue-800">Payment Details</h3>
+          <div className="text-sm space-y-1">
+            <p><strong>Bank:</strong> STATE BANK OF INDIA</p>
+            <p><strong>Name:</strong> KROZTEK INTEGRATED SOLUTION</p>
+            <p><strong>IFSC:</strong> SBIN0000068</p>
+            <p><strong>Account No:</strong> 41936176103</p>
+          </div>
+          <p className="text-sm text-blue-700">Scan this QR code using any UPI app:</p>
+          <img src="/img/upi-qr-sample.png" alt="UPI QR Code" className="w-32 h-32 border rounded mx-auto" />
+          <p className="text-center text-sm">OR pay using UPI ID: <strong>kroztek@upi</strong></p>
         </div>
 
         <button
           onClick={() => setShowModal(true)}
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+          disabled={cart.length === 0}
+          className="w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
         >
-          I Have Paid
+          I Have Paid - Confirm Order
         </button>
       </div>
 
       {/* Modal for Transaction ID */}
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white p-6 rounded w-96 space-y-4">
-            <h3 className="text-lg font-semibold">Enter UPI Transaction ID</h3>
+          <div className="bg-white p-6 rounded-lg w-96 space-y-4 shadow-xl">
+            <h3 className="text-lg font-semibold">Enter Transaction Details</h3>
+            <p className="text-sm text-gray-600">Please enter your UPI transaction ID to confirm your payment</p>
             <input
               type="text"
               value={transactionId}
               onChange={(e) => setTransactionId(e.target.value)}
-              className="border px-3 py-2 rounded w-full"
-              placeholder="Transaction ID"
+              className="border px-3 py-2 rounded w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Enter Transaction ID (e.g., 123456789012)"
+              required
             />
-            <div className="flex justify-end gap-2 mt-2">
+            <div className="flex justify-end gap-2 mt-4">
               <button
                 onClick={() => setShowModal(false)}
-                className="px-4 py-2 border rounded"
+                className="px-4 py-2 border rounded hover:bg-gray-50 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleConfirmPayment}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                disabled={!transactionId.trim()}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
               >
-                Confirm
+                Confirm Order
               </button>
             </div>
           </div>
