@@ -9,12 +9,14 @@ interface ProductDetailPageProps {
 }
 
 // Optional: Generate static paths for build optimization
+// Optional: Generate static paths for build optimization
 export async function generateStaticParams() {
   return products.map((product) => ({
-    id: product.id,
+    params: {
+      id: product.id,
+    },
   }));
 }
-
 // Optional: Metadata for SEO
 export async function generateMetadata({ params }: { params: { id: string } }) {
   const product = products.find((p) => p.id === params.id);
