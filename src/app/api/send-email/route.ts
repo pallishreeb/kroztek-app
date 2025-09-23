@@ -6,11 +6,10 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const { to, subject, message } = body;
+    const { to, subject, message } = await req.json();
 
     const data = await resend.emails.send({
-      from: "Kroztek <onboarding@resend.dev>", // replace with your verified sender later
+      from: "Kroztek <onboarding@resend.dev>", // verified sender
       to,
       subject,
       html: `<p>${message}</p>`,
