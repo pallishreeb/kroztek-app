@@ -1,5 +1,6 @@
 import { products, Product } from "@/data/products";
 import ProductDetailClient from "./ProductDetailClient";
+import Link from "next/link";
 
 interface ProductDetailPageProps {
   params: Promise<{ id: string }>;
@@ -19,13 +20,10 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
         <div className="text-center">
           <div className="text-6xl mb-4">🔍</div>
           <h1 className="text-2xl font-bold text-gray-800 mb-2">Product Not Found</h1>
-          <p className="text-gray-600 mb-4">The product you're looking for doesn't exist.</p>
-          <a 
-            href="/products" 
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Browse All Products
-          </a>
+          <p className="text-gray-600 mb-4">The product you&apos;re looking for doesn&apos;t exist.</p>
+          <Link href="/products" className="text-blue-600 hover:underline">
+            Go back to Products
+          </Link>
         </div>
       </div>
     );
