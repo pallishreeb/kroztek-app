@@ -69,7 +69,7 @@ useEffect(() => {
         "pallishreebehera01@gmail.com",
       ];
 
-      if (adminEmails.includes(user.email)) {
+      if (adminEmails.includes(user.email ?? "")) {
         // Admin: get all orders
         q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
       } else {
