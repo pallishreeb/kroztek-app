@@ -62,7 +62,7 @@ export default function ProductDetailClient({ product }: Props) {
         {/* Product Info */}
         <div>
           <h1 className="text-2xl font-bold">{product.name}</h1>
-          <p className="text-xl text-indigo-600 mt-2">{product.price} {product.gst}</p>
+          <p className="text-xl text-indigo-600 mt-2">Rs.{product.price} + {product.gst}% GST</p>
 
           {/* Technical Details */}
           <ul className="mt-4 text-gray-700 space-y-1">

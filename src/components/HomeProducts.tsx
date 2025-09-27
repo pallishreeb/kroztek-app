@@ -24,7 +24,7 @@ export default function ProductCard({ product }: { product: Product }) {
 
           {/* Price + Eye icon */}
           <div className="flex items-center justify-between mt-3">
-            <p className="text-indigo-600 font-bold text-lg">{product.price}</p>
+            <p className="text-indigo-600 font-bold text-lg">Rs.{product.price}</p>
             <Eye className="text-gray-500 hover:text-indigo-600 cursor-pointer" size={20} />
           </div>
         </div>

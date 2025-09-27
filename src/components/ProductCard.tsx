@@ -21,7 +21,7 @@ export default function ProductCard({ product }: { product: Product }) {
             <p className="text-gray-500 text-sm mt-1 line-clamp-2">{product.description}</p>
           </div>
 
-          <p className="text-indigo-600 font-bold text-lg mt-3">{product.price}</p>
+          <p className="text-indigo-600 font-bold text-lg mt-3">Rs.{product.price}</p>
         </div>
       </div>
     </Link>
