@@ -37,7 +37,7 @@ export default function ProductDetailClient({ product }: Props) {
           </li>
           <li>/</li>
           <li>
-            <Link href="/products" className="hover:underline">CG Emotron</Link>
+            <Link href="/series" className="hover:underline">CG Emotron</Link>
           </li>
           <li>/</li>
           <li>

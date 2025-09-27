@@ -51,50 +51,66 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (!user) {
-      setOrders([]);
-      setLoading(false);
-      return;
-    }
+useEffect(() => {
+  if (!user) {
+    setOrders([]);
+    setLoading(false);
+    return;
+  }
 
-    const fetchOrders = async () => {
-      setLoading(true);
-      try {
-        const q = query(
+  const fetchOrders = async () => {
+    setLoading(true);
+    try {
+      let q;
+
+      // Admin emails
+      const adminEmails = [
+        "kroztekintegratedsolution@gmail.com",
+        "pallishreebehera01@gmail.com",
+      ];
+
+      if (adminEmails.includes(user.email)) {
+        // Admin: get all orders
+        q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
+      } else {
+        // Normal user: get only their orders
+        q = query(
           collection(db, "orders"),
           where("userId", "==", user.uid),
           orderBy("createdAt", "desc")
         );
-        const querySnapshot = await getDocs(q);
-
-        const ordersData: Order[] = querySnapshot.docs.map((doc) => {
-          const data = doc.data();
-          return {
-            id: doc.id,
-            userId: data.userId,
-            userEmail: data.userEmail, // ✅ Include userEmail from Firestore
-            billingDetails: data.billingDetails as BillingDetails,
-            cart: data.cart as CartItem[],
-            subtotal: data.subtotal,
-            tax: data.tax,
-            total: data.total,
-            transactionId: data.transactionId,
-            status: data.status,
-            createdAt: data.createdAt as Timestamp,
-          };
-        });
-
-        setOrders(ordersData);
-      } catch (error) {
-        console.error("Error fetching orders:", error);
-      } finally {
-        setLoading(false);
       }
-    };
 
-    fetchOrders();
-  }, [user]);
+      const querySnapshot = await getDocs(q);
+
+      const ordersData: Order[] = querySnapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          userId: data.userId,
+          userEmail: data.userEmail,
+          billingDetails: data.billingDetails as BillingDetails,
+          cart: data.cart as CartItem[],
+          subtotal: data.subtotal,
+          tax: data.tax,
+          total: data.total,
+          transactionId: data.transactionId,
+          status: data.status,
+          createdAt: data.createdAt as Timestamp,
+        };
+      });
+
+      setOrders(ordersData);
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchOrders();
+}, [user]);
+
 
   if (loading) {
     return (
@@ -139,7 +155,7 @@ export default function OrdersPage() {
             <h2 className="text-2xl font-bold text-gray-800 mb-2">No Orders Found</h2>
             <p className="text-gray-600 mb-4">You haven&apos;t placed any orders yet.</p>
             <Link
-              href="/products" 
+              href="/series" 
               className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
             >
               Start Shopping

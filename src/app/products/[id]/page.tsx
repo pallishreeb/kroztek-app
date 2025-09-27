@@ -21,7 +21,7 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
           <div className="text-6xl mb-4">🔍</div>
           <h1 className="text-2xl font-bold text-gray-800 mb-2">Product Not Found</h1>
           <p className="text-gray-600 mb-4">The product you&apos;re looking for doesn&apos;t exist.</p>
-          <Link href="/products" className="text-blue-600 hover:underline">
+          <Link href="/series" className="text-blue-600 hover:underline">
             Go back to Products
           </Link>
         </div>

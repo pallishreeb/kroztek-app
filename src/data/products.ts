@@ -5,7 +5,7 @@ export type Product = {
   price: string;
   description: string;
   image: string;
-
+  range?: string;               // Operating range
   // Optional fields
   gst?: string;                 // GST info
   sku?: string;                 // Product SKU
@@ -46,6 +46,7 @@ export const products: Product[] = [
   "kw": "0.25 KW",
   "hp": "0.5 HP",
   "amps": "2.5 Amps",
+  "range":"0.4 - 2.2 ",
   "weight": "1 kg",
   "features": [
     "0.25kW / 0.5HP Output – Ideal for low-power applications",
@@ -243,6 +244,7 @@ export const products: Product[] = [
   "hp": "N/A",
   "amps": "0–10A",
   "weight": "N/A",
+  "range": "0 - 10",
   "features": [
     "True shaft power monitoring using motor current + phase angle",
     "No external sensors required — lower cost, faster install",
@@ -470,6 +472,7 @@ export const products: Product[] = [
   "hp": "2 HP",
   "amps": "4.2 Amps",
   "weight": "1 kg",
+  "range": "0.75 - 3.7",
   "features": [
     "Compact and lightweight (only 1 kg)",
     "Standard LED display for clear diagnostics",
@@ -699,6 +702,7 @@ export const products: Product[] = [
   "hp": "1 HP",
   "amps": "2.5 Amps",
   "weight": "1.5 kg",
+  "range": "0.75 - 55",
   "features": [
     "LCD Graphical Display with built-in oscilloscope",
     "200% overload handling for 1 second",

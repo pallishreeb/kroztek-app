@@ -6,6 +6,7 @@ import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { useAuth } from "../context/AuthContext"; // 🔑 auth context
 import { useCart } from "../context/CartContext"; // 🔑 cart context
 import { useRouter } from "next/navigation";
+import LoginButton from "@/components/LoginButton";
 
 export default function CheckoutPage() {
   const { cart, clearCart } = useCart(); // 🔑 get cart from context
@@ -31,71 +32,99 @@ export default function CheckoutPage() {
   const [shippingCost, setShippingCost] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [transactionId, setTransactionId] = useState("");
-
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   // Load billing email if user is logged in
   useEffect(() => {
     if (user?.email) {
       setBilling((prev) => ({ ...prev, email: user.email || "" })); // Fix: Handle null case
     }
   }, [user]);
-
+  useEffect(() => {
+    if (user?.email && showLoginPrompt) {
+      setShowLoginPrompt(false);
+    }
+  }, [user, showLoginPrompt]);
   const handleBillingChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     setBilling({ ...billing, [e.target.name]: e.target.value });
   };
 
-  const subtotal = cart.reduce((sum, item) => sum + item.quantity * parseFloat(item.product.price), 0);
+  const subtotal = cart.reduce(
+    (sum, item) => sum + item.quantity * parseFloat(item.product.price),
+    0
+  );
   const tax = subtotal * taxRate;
   const total = subtotal + tax + shippingCost;
-
-const handleConfirmPayment = async () => {
-  if (!transactionId) {
-    alert("Please enter your Transaction ID to confirm payment.");
-    return;
-  }
-
-  if (!cart || cart.length === 0) {
-    alert("Your cart is empty. Cannot confirm payment.");
-    return;
-  }
-
-  // Optional: require login before checkout
-  if (!user) {
-    alert("Please login first to place an order!");
-    return;
-  }
-
-  const orderData = {
-    userId: user?.uid || "guest",
-    userEmail: user?.email || billing.email,
-    billingDetails: billing,
-    cart: cart.map((item) => ({
-      id: item.product.id,
-      name: item.product.name,
-      price: parseFloat(item.product.price),
-      quantity: item.quantity,
-      image: item.product.image,
-    })),
-    subtotal,
-    tax,
-    total,
-    transactionId,
-    status: "paid",
-    createdAt: serverTimestamp(),
+  const validateBilling = () => {
+    const requiredFields = [
+      "firstName",
+      "lastName",
+      "address",
+      "city",
+      "state",
+      "zip",
+      "phone",
+      "email",
+    ];
+    for (const field of requiredFields) {
+      if (!billing[field as keyof typeof billing]?.trim()) {
+        alert(`Please fill ${field} before confirming payment.`);
+        return false;
+      }
+    }
+    return true;
   };
 
-  try {
-    await addDoc(collection(db, "orders"), orderData);
+  const handleConfirmPayment = async () => {
+    if (!transactionId) {
+      alert("Please enter your Transaction ID to confirm payment.");
+      return;
+    }
 
-    // ✅ SEND EMAIL via Resend API after saving order
-    await fetch("/api/send-email", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        to: [billing.email, "kroztekintegratedsolution@gmail.com"], // customer + admin
-        subject: "Order Confirmation - Kroztek",
-        message: `
+    if (!cart || cart.length === 0) {
+      alert("Your cart is empty. Cannot confirm payment.");
+      return;
+    }
+
+    // Optional: require login before checkout
+    if (!user) {
+      setShowLoginPrompt(true);
+      return;
+    }
+
+    const orderData = {
+      userId: user?.uid || "guest",
+      userEmail: user?.email || billing.email,
+      billingDetails: billing,
+      cart: cart.map((item) => ({
+        id: item.product.id,
+        name: item.product.name,
+        price: parseFloat(item.product.price),
+        quantity: item.quantity,
+        image: item.product.image,
+      })),
+      subtotal,
+      tax,
+      total,
+      transactionId,
+      status: "paid",
+      createdAt: serverTimestamp(),
+    };
+
+    try {
+      await addDoc(collection(db, "orders"), orderData);
+
+      // ✅ SEND EMAIL via Resend API after saving order
+      await fetch("/api/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: [billing.email, "kroztekintegratedsolution@gmail.com"], // customer + admin
+          subject: "Order Confirmation - Kroztek",
+          message: `
           <h2>Thank you for your order, ${billing.firstName}!</h2>
           <p>We've received your order and will start processing soon.</p>
           
@@ -122,23 +151,22 @@ const handleConfirmPayment = async () => {
           <p>You can view your orders anytime in your account.</p>
           <p>— Team Kroztek</p>
         `,
-      }),
-    });
+        }),
+      });
 
-    alert(`Payment recorded!\nTransaction ID: ${transactionId}`);
+      alert(`Payment recorded!\nTransaction ID: ${transactionId}`);
 
-    // Clear cart
-    clearCart();
-    setShowModal(false);
+      // Clear cart
+      clearCart();
+      setShowModal(false);
 
-    // Redirect to Orders page
-    router.push("/orders");
-  } catch (error) {
-    console.error("Error saving order: ", error);
-    alert("Something went wrong. Please try again!");
-  }
-};
-
+      // Redirect to Orders page
+      router.push("/orders");
+    } catch (error) {
+      console.error("Error saving order: ", error);
+      alert("Something went wrong. Please try again!");
+    }
+  };
 
   return (
     <div className="container mx-auto px-4 py-8 grid md:grid-cols-2 gap-8">
@@ -262,8 +290,12 @@ const handleConfirmPayment = async () => {
           {cart.length > 0 ? (
             cart.map((item) => (
               <div key={item.product.id} className="flex justify-between">
-                <span>{item.product.name} × {item.quantity}</span>
-                <span>₹{(item.quantity * parseFloat(item.product.price)).toFixed(2)}</span>
+                <span>
+                  {item.product.name} × {item.quantity}
+                </span>
+                <span>
+                  ₹{(item.quantity * parseFloat(item.product.price)).toFixed(2)}
+                </span>
               </div>
             ))
           ) : (
@@ -291,18 +323,36 @@ const handleConfirmPayment = async () => {
         <div className="mt-4 space-y-2 bg-blue-50 p-4 rounded">
           <h3 className="font-semibold text-blue-800">Payment Details</h3>
           <div className="text-sm space-y-1">
-            <p><strong>Bank:</strong> STATE BANK OF INDIA</p>
-            <p><strong>Name:</strong> KROZTEK INTEGRATED SOLUTION</p>
-            <p><strong>IFSC:</strong> SBIN0000068</p>
-            <p><strong>Account No:</strong> 41936176103</p>
+            <p>
+              <strong>Bank:</strong> STATE BANK OF INDIA
+            </p>
+            <p>
+              <strong>Name:</strong> KROZTEK INTEGRATED SOLUTION
+            </p>
+            <p>
+              <strong>IFSC:</strong> SBIN0000068
+            </p>
+            <p>
+              <strong>Account No:</strong> 41936176103
+            </p>
           </div>
-          <p className="text-sm text-blue-700">Scan this QR code using any UPI app:</p>
-          <img src="/img/upi-qr-sample.png" alt="UPI QR Code" className="w-32 h-32 border rounded mx-auto" />
-          <p className="text-center text-sm">OR pay using UPI ID: <strong>kroztek@upi</strong></p>
+          <p className="text-sm text-blue-700">
+            Scan this QR code using any UPI app:
+          </p>
+          <img
+            src="/img/upi-qr-sample.png"
+            alt="UPI QR Code"
+            className="w-32 h-32 border rounded mx-auto"
+          />
+          <p className="text-center text-sm">
+            OR pay using UPI ID: <strong>kroztek@upi</strong>
+          </p>
         </div>
 
         <button
-          onClick={() => setShowModal(true)}
+          onClick={() => {
+            if (validateBilling()) setShowModal(true);
+          }}
           disabled={cart.length === 0}
           className="w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
         >
@@ -315,7 +365,9 @@ const handleConfirmPayment = async () => {
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded-lg w-96 space-y-4 shadow-xl">
             <h3 className="text-lg font-semibold">Enter Transaction Details</h3>
-            <p className="text-sm text-gray-600">Please enter your UPI transaction ID to confirm your payment</p>
+            <p className="text-sm text-gray-600">
+              Please enter your UPI transaction ID to confirm your payment
+            </p>
             <input
               type="text"
               value={transactionId}
@@ -338,6 +390,28 @@ const handleConfirmPayment = async () => {
               >
                 Confirm Order
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Login Prompt Modal */}
+      {showLoginPrompt && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded-lg w-96 space-y-4 shadow-xl">
+            <h3 className="text-lg font-semibold">Login Required</h3>
+            <p className="text-gray-600">
+              Please login to place your order and track your purchases.
+            </p>
+
+            <div className="flex justify-end gap-2 mt-4">
+              <button
+                onClick={() => setShowLoginPrompt(false)}
+                className="px-4 py-2 border rounded hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <LoginButton />
             </div>
           </div>
         </div>

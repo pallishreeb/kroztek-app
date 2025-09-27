@@ -3,11 +3,14 @@
 import { useSearchParams } from "next/navigation";
 import { products } from "@/data/products";
 import Link from "next/link";
-import ProductCard from "@/components/ProductCard";
+import { useCart } from "../context/CartContext";
+import { useState } from "react";
 
 export default function ProductsContent() {
+   const [notification, setNotification] = useState(null);
   const searchParams = useSearchParams();
   const category = searchParams.get("cat");
+  const { addToCart } = useCart();
 
   // Map category codes to readable names
   const categoryMap: Record<string, string> = {
@@ -17,7 +20,24 @@ export default function ProductsContent() {
     vsr: "VSR",
     vss: "VSS",
   };
-
+  // Check for Coming Soon categories
+if (category === "m20" || category === "vsr") {
+  return (
+    <div className="container mx-auto px-4 py-16 text-center">
+      <h1 className="text-3xl font-bold mb-4">Coming Soon!</h1>
+      <p className="text-gray-600 text-lg mb-6">
+        The {categoryMap[category]} series will be available soon. Stay tuned!
+      </p>
+      <Link
+        href="/series"
+        className="inline-block bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700 transition"
+      >
+        Browse Other Series
+      </Link>
+    </div>
+  );
+}
+  // Filter products based on category
   let filteredProducts = products;
   let categoryName = "All Products";
 
@@ -28,6 +48,21 @@ export default function ProductsContent() {
     categoryName = categoryMap[category];
   }
 
+  if (filteredProducts.length === 0) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <p className="text-gray-500">No products found in this category.</p>
+      </div>
+    );
+  }
+
+  // take first product for common info
+  const categoryInfo = filteredProducts[0];
+  const handleAddToCart = (product, qty) => {
+    addToCart(product, qty);
+    setNotification(`${product.model} (${qty}) added to cart!`);
+    setTimeout(() => setNotification(null), 3000);
+  };
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Breadcrumb */}
@@ -40,7 +75,7 @@ export default function ProductsContent() {
           </li>
           <li>/</li>
           <li>
-            <Link href="/products" className="hover:underline">
+            <Link href="/series" className="hover:underline">
               CG Emotron
             </Link>
           </li>
@@ -49,19 +84,194 @@ export default function ProductsContent() {
         </ol>
       </nav>
 
-      {/* Category Title */}
-      <h1 className="text-2xl font-bold mb-6">{categoryName}</h1>
+      <div className="max-w-4xl mx-auto mb-10 text-center">
+        <h1 className="text-3xl font-bold mb-4">{categoryName} Category</h1>
+        <p className="text-gray-600 mb-8">
+          Explore all models under the {categoryName} series.
+        </p>
+        <img
+          src={categoryInfo.image}
+          alt={categoryName}
+          className="max-w-lg mx-auto w-full h-auto rounded shadow"
+        />
+      </div>
 
-      {/* Product Grid */}
-      {filteredProducts.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {filteredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
+      {/* Product Table */}
+      <section className="bg-white border p-6 rounded-lg">
+        <h2 className="text-xl font-semibold mb-4">Available Models</h2>
+        <div className="overflow-x-auto">
+          <table className="w-full border">
+            <thead className="bg-gray-100 hidden md:table-header-group">
+              <tr>
+                <th className="p-3 border">Model Name</th>
+                <th className="p-3 border">KW / HP</th>
+                <th className="p-3 border">Current</th>
+                <th className="p-3 border">Price</th>
+                <th className="p-3 border">Quantity</th>
+                <th className="p-3 border">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredProducts.map((p) => (
+                <ProductRow key={p.id} product={p} addToCart={handleAddToCart} />
+              ))}
+            </tbody>
+          </table>
         </div>
-      ) : (
-        <p className="text-gray-500">No products found in this category.</p>
+      </section>
+      {/* Series Range */}
+      {categoryInfo.seriesRange?.length > 0 && (
+        <section className="bg-blue-50 p-6 rounded-lg mb-6">
+          <h2 className="text-xl font-semibold mb-4">Series Range</h2>
+          <ul className="list-disc ml-5 space-y-2">
+            {categoryInfo.seriesRange.map((s, i) => (
+              <li key={i}>{s}</li>
+            ))}
+          </ul>
+        </section>
       )}
+      {/* Benefits */}
+      {categoryInfo.benefits?.length > 0 && (
+        <section className="bg-green-50 p-6 rounded-lg mb-6">
+          <h2 className="text-xl font-semibold mb-4">Benefits</h2>
+          <ul className="list-disc ml-5 space-y-2">
+            {categoryInfo.benefits.map((b, i) => (
+              <li key={i}>{b}</li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {/* Overview */}
+      {categoryInfo.description && (
+        <section className="bg-gray-50 p-6 rounded-lg mb-6">
+          <h2 className="text-xl font-semibold mb-4">Product Overview</h2>
+          <p>{categoryInfo.description}</p>
+        </section>
+      )}
+
+      {/* Key Features */}
+      {categoryInfo.features?.length > 0 && (
+        <section className="bg-white border p-6 rounded-lg mb-6">
+          <h2 className="text-xl font-semibold mb-4">Key Features</h2>
+          <ul className="list-disc ml-5 space-y-2">
+            {categoryInfo.features.map((f, i) => (
+              <li key={i}>{f}</li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {/* Applications */}
+      {categoryInfo.applications?.length > 0 && (
+        <section className="bg-purple-50 p-6 rounded-lg mb-6">
+          <h2 className="text-xl font-semibold mb-4">Applications</h2>
+          <ul className="list-disc ml-5 space-y-2">
+            {categoryInfo.applications.map((a, i) => (
+              <li key={i}>{a}</li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {/* Notification Toast */}
+{notification && (
+  <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-slide-in">
+    <div className="flex items-center gap-2">
+      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
+      </svg>
+      {notification}
     </div>
+  </div>
+)}
+    </div>
+  );
+}
+
+// Separate row component to handle its own qty state
+function ProductRow({ product, addToCart }: any) {
+  const [qty, setQty] = useState(1);
+
+  return (
+    <>
+      {/* Desktop Table Row */}
+      <tr className="hover:bg-gray-50 hidden md:table-row">
+        <td className="p-3 border">{product.model}</td>
+        <td className="p-3 border">
+          {product.kw} kW / {product.hp} HP
+        </td>
+        <td className="p-3 border">{product.amps} A</td>
+        <td className="p-3 border">
+          Rs.{product.price} + {product.gst}% GST
+        </td>
+        <td className="p-3 border">
+          <input
+            type="number"
+            value={qty}
+            onChange={(e) => setQty(Math.max(1, Number(e.target.value)))}
+            className="w-16 border px-2 py-1 rounded"
+            min={1}
+          />
+        </td>
+        <td className="p-3 border">
+          <button
+            onClick={() => addToCart(product, qty)}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          >
+            Add to Cart
+          </button>
+        </td>
+      </tr>
+
+      {/* Mobile Card Layout */}
+      <tr className="md:hidden">
+        <td colSpan={6} className="p-0">
+          <div className="p-4 border-b bg-gray-50 hover:bg-gray-100">
+            <div className="space-y-3">
+              {/* Model Name */}
+              <div>
+                <h3 className="font-semibold text-lg">{product.model}</h3>
+              </div>
+
+              {/* Stacked Info */}
+              <div className="text-sm text-gray-700 space-y-1">
+                <div>
+                  {product.kw} kW / {product.hp} HP
+                </div>
+                <div>{product.amps} A</div>
+              </div>
+
+              {/* Price */}
+              <div className="text-lg font-medium text-gray-900">
+                Rs.{product.price} + {product.gst}% GST
+              </div>
+
+              {/* Quantity and Action Row */}
+              <div className="flex items-center justify-between pt-2">
+                <div className="flex items-center gap-2">
+                  <label className="text-sm font-medium">Qty:</label>
+                  <input
+                    type="number"
+                    value={qty}
+                    onChange={(e) =>
+                      setQty(Math.max(1, Number(e.target.value)))
+                    }
+                    className="w-16 border px-2 py-1 rounded"
+                    min={1}
+                  />
+                </div>
+                <button
+                  onClick={() => addToCart(product, qty)}
+                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                >
+                  Add to Cart
+                </button>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+    </>
   );
 }

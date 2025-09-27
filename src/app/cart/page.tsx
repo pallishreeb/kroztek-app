@@ -62,7 +62,7 @@ export default function CartPage() {
       {cart.length === 0 ? (
         <p>
           Your cart is empty.{" "}
-          <Link href="/products" className="text-blue-600 hover:underline">
+          <Link href="/series" className="text-blue-600 hover:underline">
             Shop now
           </Link>
         </p>

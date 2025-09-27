@@ -98,7 +98,7 @@ export default function Carousel() {
 
                 <div className="flex flex-col sm:flex-row gap-3">
                   <Link
-                    href="/products"
+                    href="/series"
                     className="group bg-white text-gray-900 font-semibold py-2 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 hover:bg-gray-100 inline-flex items-center gap-2"
                   >
                     Browse Products

@@ -1,10 +1,19 @@
 "use client";
 import { useEffect, useRef } from "react";
-import ProductCard from "./HomeProducts"; 
+import Link from "next/link";
 import { products } from "@/data/products";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-export default function ProductCarousel() {
+// Map category codes to readable names
+const categoryMap: Record<string, string> = {
+  vsx: "VSX",
+  m20: "M20 Shaft Power",
+  vsm: "VSM",
+  vsr: "VSR",
+  vss: "VSS",
+};
+
+export default function SeriesCarousel() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll every 3 sec
@@ -35,11 +44,13 @@ export default function ProductCarousel() {
     }
   };
 
+  // Get unique series
+  const uniqueSeries = Array.from(new Set(products.map((p) => p.category)));
+
   return (
     <div className="relative px-4 py-8 bg-gray-50">
-      <h2 className="text-2xl font-bold mb-6 text-center">Our Products</h2>
+      <h2 className="text-2xl font-bold mb-6 text-center">Our Series</h2>
 
-      {/* Carousel Wrapper */}
       <div className="relative">
         {/* Left Arrow */}
         <button
@@ -49,19 +60,34 @@ export default function ProductCarousel() {
           <ChevronLeft size={24} />
         </button>
 
-        {/* Scrollable Products */}
+        {/* Scrollable Series */}
         <div
           ref={scrollRef}
           className="flex gap-4 overflow-x-auto scroll-smooth py-2 px-2 md:px-4 scrollbar-hide"
         >
-          {products.map((product) => (
-            <div
-              key={product.id}
-              className="flex-shrink-0 w-full sm:w-1/2 md:w-1/4"
-            >
-              <ProductCard product={product} />
-            </div>
-          ))}
+          {uniqueSeries.map((cat) => {
+            const seriesProducts = products.filter((p) => p.category === cat);
+            const firstProduct = seriesProducts[0];
+            const categoryName = categoryMap[cat] || cat;
+
+            return (
+              <Link
+                key={cat}
+                href={`/products?cat=${cat}`} // link to category details page
+                className="flex-shrink-0 w-full sm:w-1/2 md:w-1/4 border rounded-lg overflow-hidden shadow hover:shadow-lg transition"
+              >
+                <img
+                  src={firstProduct.image}
+                  alt={categoryName}
+                  className="w-full h-48 object-cover"
+                />
+                <div className="p-4">
+                  <h3 className="text-lg font-semibold">{categoryName} - {firstProduct?.range} kW</h3>
+                  <p className="text-sm text-gray-600 line-clamp-2">{firstProduct.description}</p>
+                </div>
+              </Link>
+            );
+          })}
         </div>
 
         {/* Right Arrow */}
