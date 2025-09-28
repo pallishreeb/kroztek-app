@@ -9,7 +9,7 @@ export async function POST(req: Request) {
     const { to, subject, message } = await req.json();
 
     const data = await resend.emails.send({
-      from: "Kroztek <onboarding@resend.dev>", // verified sender
+      from: "Kroztek <kroztekintegratedsolution@gmail.com>", // verified sender
       to,
       subject,
       html: `<p>${message}</p>`,

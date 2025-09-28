@@ -220,13 +220,21 @@ function ProductRow({ product, addToCart }: ProductRowProps) {
   const [qty, setQty] = useState(1);
   // 👉 put helper function here
 const calculateAmount = (price: string) => {
-  const base = Number(price); // ✅ convert string to number
+  const base = Number(price); // convert string to number
   if (isNaN(base)) return "Invalid Price"; // safety check
 
-  const afterDiscount = base * 0.31; // -69% → keep 31%
+  const afterDiscount = base * 0.31; // -69%
   const afterAddOne = afterDiscount * 1.01; // +1%
-  return `Rs.${Math.round(afterAddOne)}`;
+
+  // Format with commas and two decimals
+  const formatted = afterAddOne.toLocaleString("en-IN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
+  return `Rs.${formatted}`;
 };
+
 
   return (
     <>

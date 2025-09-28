@@ -22,6 +22,16 @@ export default function CartPage() {
   const [shipping, setShipping] = useState("");
   const [shippingCost, setShippingCost] = useState(0);
   const taxRate = 0.18; // 18% tax
+// Utility function for formatting price in INR
+const formatPrice = (price: number | string) => {
+  const num = Number(price);
+  if (isNaN(num)) return "Invalid Price";
+
+  return "₹" + num.toLocaleString("en-IN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+};
 
   // Load cart from localStorage
   const loadCart = () => {
@@ -82,7 +92,7 @@ export default function CartPage() {
                 />
                 <div className="flex-1 ml-4">
                   <h2 className="font-medium">{item.product.name}</h2>
-                  <p className="text-gray-600">₹{item.product.price}</p>
+                  <p className="text-gray-600">{formatPrice(item.product.price)}</p>
                   <div className="flex items-center gap-2 mt-2">
                     <button
                       onClick={() =>
@@ -116,7 +126,7 @@ export default function CartPage() {
                 </div>
                 <div className="text-right">
                   <p className="font-medium">
-                    ₹{(item.quantity * Number(item.product.price)).toFixed(2)}
+                    {formatPrice((item.quantity * Number(item.product.price)).toFixed(2))}
                   </p>
                   <button
                     onClick={() => removeItem(item.product.id)}
@@ -134,11 +144,12 @@ export default function CartPage() {
             <h2 className="text-xl font-semibold mb-4">Cart Totals</h2>
             <div className="flex justify-between">
               <span>Subtotal</span>
-              <span>₹{subtotal.toFixed(2)}</span>
+              <span>{formatPrice(subtotal.toFixed(2))}</span>
             </div>
             <div className="flex flex-col gap-2">
-              <span>Shipping</span>
-              <input
+              <span>Shipping :</span>
+              <span className="font-semibold text-orange-700">Shipping cost will be at taken time of dispatch</span>
+              {/* <input
                 type="text"
                 placeholder="Enter your address"
                 value={shipping}
@@ -153,15 +164,15 @@ export default function CartPage() {
               </button>
               {shippingCost > 0 && (
                 <span>Shipping cost: ₹{shippingCost.toFixed(2)}</span>
-              )}
+              )} */}
             </div>
             <div className="flex justify-between">
               <span>Tax</span>
-              <span>₹{tax.toFixed(2)}</span>
+              <span>{formatPrice(tax.toFixed(2))}</span>
             </div>
             <div className="flex justify-between font-semibold text-lg">
               <span>Total</span>
-              <span>₹{total.toFixed(2)}</span>
+              <span>{formatPrice(total.toFixed(2))}</span>
             </div>
             <Link href="/checkout" className="block w-full">
               <button className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">

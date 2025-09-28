@@ -12,6 +12,7 @@ export default function CheckoutPage() {
   const { cart, clearCart } = useCart(); // 🔑 get cart from context
   const { user } = useAuth(); // 🔑 logged-in user info
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
 
   const [billing, setBilling] = useState({
     firstName: "",
@@ -94,7 +95,7 @@ export default function CheckoutPage() {
       setShowLoginPrompt(true);
       return;
     }
-
+    setLoading(true);
     const orderData = {
       userId: user?.uid || "guest",
       userEmail: user?.email || billing.email,
@@ -147,8 +148,12 @@ export default function CheckoutPage() {
           <p><b>Tax:</b> ₹${tax.toFixed(2)}</p>
           <p><b>Total:</b> ₹${total.toFixed(2)}</p>
           <p><b>Transaction ID:</b> ${transactionId}</p>
-          
-          <p>You can view your orders anytime in your account.</p>
+             ${
+               billing.orderNotes
+                 ? `<p><b>Order Notes:</b> ${billing.orderNotes}</p>`
+                 : ""
+             }
+           <p>You can view your <a href="https://www.kroztek.com/orders" target="_blank" style="color:blue; text-decoration:underline;">orders</a> anytime in your account or visit our <a href="https://www.kroztek.com/" target="_blank" style="color:blue; text-decoration:underline;">website</a>.</p>
           <p>— Team Kroztek</p>
         `,
         }),
@@ -165,6 +170,8 @@ export default function CheckoutPage() {
     } catch (error) {
       console.error("Error saving order: ", error);
       alert("Something went wrong. Please try again!");
+    } finally {
+      setLoading(false); // ✅ stop loading
     }
   };
 
@@ -385,10 +392,10 @@ export default function CheckoutPage() {
               </button>
               <button
                 onClick={handleConfirmPayment}
-                disabled={!transactionId.trim()}
+                disabled={!transactionId.trim() || loading}
                 className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
               >
-                Confirm Order
+                {loading ? "Processing..." : "Confirm Order"}
               </button>
             </div>
           </div>
