@@ -3,8 +3,92 @@ import Image from "next/image";
 export default function GuideCTA() {
   return (
     <section className="">
-      {/* Key Features */}
-      <div className="max-w-6xl mx-auto mb-20">
+
+
+      {/* Certificates Section */}
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+            Certificates & Credentials
+          </h2>
+          <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+            Our certifications and documentation that validate our commitment to
+            quality and compliance
+          </p>
+        </div>
+
+        {/* Images Grid - 3 Column Layout */}
+        <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-8">
+          {/* Service Certificate */}
+          <div className="group relative bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500">
+            <div className="aspect-[4/3] relative overflow-hidden">
+              <Image
+                src="/service.jpg"
+                alt="Authorized Dealer Certificate"
+                width={600}
+                height={400}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            </div>
+            <div className="p-6">
+              <h3 className="font-bold text-lg text-gray-800 mb-2">
+                Service Certificate
+              </h3>
+              <p className="text-gray-600 text-sm">
+                Official authorization for professional service delivery
+              </p>
+            </div>
+          </div>
+
+          {/* Product Certificate */}
+          <div className="group relative bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500">
+            <div className="aspect-[4/3] relative overflow-hidden">
+              <Image
+                src="/product.jpg"
+                alt="Product Quality Certificate"
+                width={600}
+                height={400}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            </div>
+            <div className="p-6">
+              <h3 className="font-bold text-lg text-gray-800 mb-2">
+                Product Certificate
+              </h3>
+              <p className="text-gray-600 text-sm">
+                Certification for authentic product distribution
+              </p>
+            </div>
+          </div>
+
+          {/* GST Certificate */}
+          <div className="group relative bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 md:col-span-2 lg:col-span-1">
+            <div className="aspect-[4/3] relative overflow-hidden">
+              <Image
+                src="/gst.png"
+                alt="GST Registration Certificate"
+                width={600}
+                height={400}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            </div>
+            <div className="p-6">
+              <h3 className="font-bold text-lg text-gray-800 mb-2">
+                GST Certificate
+              </h3>
+              <p className="text-gray-600 text-sm">
+                Government registration and tax compliance document
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+            {/* Key Features */}
+      <div className="max-w-6xl mx-auto mb-20 mt-12">
         <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-12">
           Why Choose KROZTEK?
         </h2>
@@ -93,88 +177,6 @@ export default function GuideCTA() {
               Our skilled team ensures professional installation, maintenance,
               and timely service for all equipment.
             </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Certificates Section */}
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-            Certificates & Credentials
-          </h2>
-          <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-            Our certifications and documentation that validate our commitment to
-            quality and compliance
-          </p>
-        </div>
-
-        {/* Images Grid - 3 Column Layout */}
-        <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-8">
-          {/* Service Certificate */}
-          <div className="group relative bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500">
-            <div className="aspect-[4/3] relative overflow-hidden">
-              <Image
-                src="/service.jpg"
-                alt="Authorized Dealer Certificate"
-                width={600}
-                height={400}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            </div>
-            <div className="p-6">
-              <h3 className="font-bold text-lg text-gray-800 mb-2">
-                Service Certificate
-              </h3>
-              <p className="text-gray-600 text-sm">
-                Official authorization for professional service delivery
-              </p>
-            </div>
-          </div>
-
-          {/* Product Certificate */}
-          <div className="group relative bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500">
-            <div className="aspect-[4/3] relative overflow-hidden">
-              <Image
-                src="/product.jpg"
-                alt="Product Quality Certificate"
-                width={600}
-                height={400}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            </div>
-            <div className="p-6">
-              <h3 className="font-bold text-lg text-gray-800 mb-2">
-                Product Certificate
-              </h3>
-              <p className="text-gray-600 text-sm">
-                Certification for authentic product distribution
-              </p>
-            </div>
-          </div>
-
-          {/* GST Certificate */}
-          <div className="group relative bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 md:col-span-2 lg:col-span-1">
-            <div className="aspect-[4/3] relative overflow-hidden">
-              <Image
-                src="/gst.png"
-                alt="GST Registration Certificate"
-                width={600}
-                height={400}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            </div>
-            <div className="p-6">
-              <h3 className="font-bold text-lg text-gray-800 mb-2">
-                GST Certificate
-              </h3>
-              <p className="text-gray-600 text-sm">
-                Government registration and tax compliance document
-              </p>
-            </div>
           </div>
         </div>
       </div>

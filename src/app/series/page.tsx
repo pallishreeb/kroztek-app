@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { Eye } from "lucide-react";
 import { products } from "@/data/products";
+
 
 // Map category codes to readable names
 const categoryMap: Record<string, string> = {
@@ -13,11 +15,11 @@ const categoryMap: Record<string, string> = {
 };
 
 export default function ProductsSeriesPage() {
-  // Get unique categories from products
-  const uniqueCategories = Array.from(
-    new Set(products.map((p) => p.category))
-  );
+  const categoryOrder = ["vsx", "vss", "vsm", "vsr","m20" ];
 
+const uniqueSeries = categoryOrder.filter((cat) =>
+  products.some((p) => p.category === cat)
+);
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Breadcrumb */}
@@ -33,24 +35,44 @@ export default function ProductsSeriesPage() {
 
       <h1 className="text-3xl font-bold mb-8">CG Emotron Series</h1>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {uniqueCategories.map((cat) => {
-          const catProducts = products.filter((p) => p.category === cat);
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {uniqueSeries.map((cat) => {
+          const seriesProducts = products.filter((p) => p.category === cat);
+          const firstProduct = seriesProducts[0];
           const categoryName = categoryMap[cat] || cat;
-          const productImage = catProducts[0]?.image; // show first product image
+
           return (
             <Link
               key={cat}
               href={`/products?cat=${cat}`}
-              className="block border rounded-lg overflow-hidden shadow hover:shadow-lg transition"
+              className="border rounded-lg overflow-hidden shadow hover:shadow-lg transition bg-white group"
             >
-              <img
-                src={productImage}
-                alt={categoryName}
-                className="w-full h-48 object-cover"
-              />
-              <div className="p-4 text-center">
-                <h2 className="text-xl font-semibold">{categoryName} - {catProducts[0]?.range} kW</h2>
+              {/* Image wrapper */}
+              <div className="relative w-full h-48 flex items-center justify-center bg-gray-100">
+                <img
+                  src={firstProduct.image}
+                  alt={categoryName}
+                  className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
+                />
+
+                {/* Eye icon on hover */}
+                <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition">
+                  <Eye className="text-white w-8 h-8" />
+                </div>
+              </div>
+
+              {/* Text section */}
+              <div className="p-4">
+                <h3 className="text-lg font-semibold">{categoryName}</h3>
+                {firstProduct?.range && (
+                  <p className="text-sm text-gray-700">{firstProduct.range}</p>
+                )}
+                {firstProduct?.rangeA && (
+                  <p className="text-sm text-gray-700">{firstProduct.rangeA}</p>
+                )}
+                <p className="text-sm text-gray-600 line-clamp-2">
+                  {firstProduct.description}
+                </p>
               </div>
             </Link>
           );

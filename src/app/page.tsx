@@ -19,7 +19,7 @@ export default function HomePage() {
       <ProductCarousel />
       <WhyChooseUs />
 
-      <Testimonials />
+      {/* <Testimonials /> */}
 
     </div>
   );

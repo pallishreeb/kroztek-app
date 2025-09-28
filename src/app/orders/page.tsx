@@ -7,6 +7,7 @@ import { format } from "date-fns";
 import { useAuth } from "../context/AuthContext";
 import { generateInvoice } from "@/lib/generateInvoice";
 import Link from "next/link";
+import LoginButton from "@/components/LoginButton";
 
 // BillingDetails type matching your checkout page structure
 interface BillingDetails {
@@ -133,12 +134,7 @@ useEffect(() => {
             <div className="text-6xl mb-4">🔒</div>
             <h2 className="text-2xl font-bold text-gray-800 mb-2">Login Required</h2>
             <p className="text-gray-600 mb-4">Please login to view your orders.</p>
-            <a 
-              href="/auth/login" 
-              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Login Now
-            </a>
+            <LoginButton />
           </div>
         </div>
       </div>

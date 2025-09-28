@@ -97,8 +97,8 @@ export default function ProductsContent() {
       {/* Category Heading */}
       <div className="max-w-4xl mx-auto mb-10 text-center">
         <h1 className="text-3xl font-bold mb-4">{categoryName} Category</h1>
-        <p className="text-gray-600 mb-8">
-          Explore all models under the {categoryName} series.
+        <p className="text-xl  text-gray-600 font-semibold mb-8">
+          {categoryInfo?.modelInfo}.
         </p>
         <div className="max-w-lg mx-auto w-full h-auto rounded shadow overflow-hidden">
           <Image
@@ -218,6 +218,15 @@ export default function ProductsContent() {
 // Separate row component with qty state
 function ProductRow({ product, addToCart }: ProductRowProps) {
   const [qty, setQty] = useState(1);
+  // 👉 put helper function here
+const calculateAmount = (price: string) => {
+  const base = Number(price); // ✅ convert string to number
+  if (isNaN(base)) return "Invalid Price"; // safety check
+
+  const afterDiscount = base * 0.31; // -69% → keep 31%
+  const afterAddOne = afterDiscount * 1.01; // +1%
+  return `Rs.${Math.round(afterAddOne)}`;
+};
 
   return (
     <>
@@ -225,21 +234,41 @@ function ProductRow({ product, addToCart }: ProductRowProps) {
       <tr className="hover:bg-gray-50 hidden md:table-row">
         <td className="p-3 border">{product.model}</td>
         <td className="p-3 border">
-          {typeof product.kw === 'string' ? product.kw : `${product.kw}`} kW / {typeof product.hp === 'string' ? product.hp : `${product.hp}`} HP
-        </td>
-        <td className="p-3 border">{typeof product.amps === 'string' ? product.amps : `${product.amps}`} A</td>
-        <td className="p-3 border">
-          Rs.{product.price} + {product.gst}% GST
+          {typeof product.kw === "string" ? product.kw : `${product.kw}`} /{" "}
+          {typeof product.hp === "string" ? product.hp : `${product.hp}`}
         </td>
         <td className="p-3 border">
-          <input
-            type="number"
-            value={qty}
-            onChange={(e) => setQty(Math.max(1, Number(e.target.value)))}
-            className="w-16 border px-2 py-1 rounded"
-            min={1}
-          />
+          {typeof product.amps === "string" ? product.amps : `${product.amps}`}{" "}
+          
         </td>
+        <td className="p-3 border">
+          {calculateAmount(product?.price)} + {product.gst}% GST
+        </td>
+        <td className="p-3 border">
+          <div className="flex items-center justify-center border rounded w-fit mx-auto">
+            <button
+              onClick={() => setQty((prev) => Math.max(1, prev - 1))}
+              className="px-2 py-1 text-lg font-bold hover:bg-gray-100 disabled:opacity-50"
+              disabled={qty === 1}
+            >
+              -
+            </button>
+            <input
+              type="number"
+              value={qty}
+              onChange={(e) => setQty(Math.max(1, Number(e.target.value)))}
+              className="w-12 text-center outline-none"
+              min={1}
+            />
+            <button
+              onClick={() => setQty((prev) => prev + 1)}
+              className="px-2 py-1 text-lg font-bold hover:bg-gray-100"
+            >
+              +
+            </button>
+          </div>
+        </td>
+
         <td className="p-3 border">
           <button
             onClick={() => addToCart(product, qty)}
@@ -259,28 +288,55 @@ function ProductRow({ product, addToCart }: ProductRowProps) {
 
               <div className="text-sm text-gray-700 space-y-1">
                 <div>
-                  {typeof product.kw === 'string' ? product.kw : `${product.kw}`} kW / {typeof product.hp === 'string' ? product.hp : `${product.hp}`} HP
+                  {typeof product.kw === "string"
+                    ? product.kw
+                    : `${product.kw}`}{" "}
+                  /{" "}
+                  {typeof product.hp === "string"
+                    ? product.hp
+                    : `${product.hp}`}
                 </div>
-                <div>{typeof product.amps === 'string' ? product.amps : `${product.amps}`} A</div>
+                <div>
+                  {typeof product.amps === "string"
+                    ? product.amps
+                    : `${product.amps}`}{" "}
+                </div>
               </div>
 
               <div className="text-lg font-medium text-gray-900">
-                Rs.{product.price} + {product.gst}% GST
+                {calculateAmount(product?.price)}  + {product.gst}% GST
               </div>
 
               <div className="flex items-center justify-between pt-2">
+                {/* Quantity Control */}
                 <div className="flex items-center gap-2">
                   <label className="text-sm font-medium">Qty:</label>
-                  <input
-                    type="number"
-                    value={qty}
-                    onChange={(e) =>
-                      setQty(Math.max(1, Number(e.target.value)))
-                    }
-                    className="w-16 border px-2 py-1 rounded"
-                    min={1}
-                  />
+                  <div className="flex items-center border rounded">
+                    <button
+                      onClick={() => setQty((prev) => Math.max(1, prev - 1))}
+                      className="px-2 py-1 text-lg font-bold hover:bg-gray-100"
+                    >
+                      -
+                    </button>
+                    <input
+                      type="number"
+                      value={qty}
+                      onChange={(e) =>
+                        setQty(Math.max(1, Number(e.target.value)))
+                      }
+                      className="w-12 text-center outline-none"
+                      min={1}
+                    />
+                    <button
+                      onClick={() => setQty((prev) => prev + 1)}
+                      className="px-2 py-1 text-lg font-bold hover:bg-gray-100"
+                    >
+                      +
+                    </button>
+                  </div>
                 </div>
+
+                {/* Add to Cart */}
                 <button
                   onClick={() => addToCart(product, qty)}
                   className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"

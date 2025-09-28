@@ -1,16 +1,34 @@
 "use client";
 
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult } from "firebase/auth";
 import { auth } from "../lib/firebase";
 import { useAuth } from "../app/context/AuthContext";
+import { useEffect } from "react";
 
 export default function LoginButton() {
   const { user, logout, loading } = useAuth();
 
   const loginWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
-    await signInWithPopup(auth, provider);
+    if (/Mobi|Android/i.test(navigator.userAgent)) {
+      // Use redirect on mobile
+      await signInWithRedirect(auth, provider);
+    } else {
+      // Use popup on desktop
+      await signInWithPopup(auth, provider);
+    }
   };
+
+  // Handle redirect result (needed for mobile login)
+  useEffect(() => {
+    getRedirectResult(auth)
+      .then((result) => {
+        if (result?.user) {
+          console.log("Logged in via redirect:", result.user);
+        }
+      })
+      .catch((err) => console.error(err));
+  }, []);
 
   if (loading) return <button>Loading...</button>;
 
