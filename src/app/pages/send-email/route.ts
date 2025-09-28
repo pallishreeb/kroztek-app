@@ -10,7 +10,7 @@ export async function POST(req: Request) {
     const { to, subject, message } = body;
 
     const data = await resend.emails.send({
-      from: "Kroztek <kroztekintegratedsolution@gmail.com>", // replace with your verified sender later
+      from: "Kroztek <onboarding@resend.dev>", // replace with your verified sender later
       to,
       subject,
       html: `<p>${message}</p>`,
