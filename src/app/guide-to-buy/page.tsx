@@ -48,7 +48,7 @@ export default function GuideToBuyPage() {
   const [counts, setCounts] = useState({ vsm: 0, vsx: 0, other: 0 });
 
   useEffect(() => {
-    const target = { vsm: 200, vsx: 150, other: 500 };
+    const target = { vsm: 200, vsx: 390, other: 300 };
     let i = 0;
     const interval = setInterval(() => {
       i += 10;
@@ -116,7 +116,7 @@ export default function GuideToBuyPage() {
         </div>
         <div className="p-6 bg-white rounded-xl shadow">
           <p className="text-3xl font-bold text-indigo-600">{counts.other}+</p>
-          <p className="text-gray-600">Other Products</p>
+          <p className="text-gray-600">Crompton VSS Series</p>
         </div>
       </div>
     </div>

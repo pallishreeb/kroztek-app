@@ -94,33 +94,6 @@ export default function GuideCTA() {
           Why Choose KROZTEK?
         </h2>
         <div className="grid md:grid-cols-3 gap-8">
-          {/* GST Registration */}
-          <div className="group bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 hover:border-blue-200">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-              <svg
-                className="w-8 h-8 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                ></path>
-              </svg>
-            </div>
-            <h3 className="text-xl font-bold text-gray-800 mb-4">
-              GST Registered
-            </h3>
-            <p className="text-gray-600 mb-4">
-              Fully compliant with Indian tax regulations
-            </p>
-            <p className="text-sm font-mono bg-blue-50 text-blue-700 px-3 py-2 rounded-lg">
-              GSTIN: 21EOUPS1807D1ZX
-            </p>
-          </div>
 
           {/* Authorized Dealer */}
           <div className="group bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 hover:border-green-200">
@@ -179,6 +152,34 @@ export default function GuideCTA() {
               and timely service for all equipment.
             </p>
           </div>
+          {/* GST Registration */}
+          <div className="group bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 hover:border-blue-200">
+            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+              <svg
+                className="w-8 h-8 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                ></path>
+              </svg>
+            </div>
+            <h3 className="text-xl font-bold text-gray-800 mb-4">
+              GST Registered
+            </h3>
+            <p className="text-gray-600 mb-4">
+              Fully compliant with Indian tax regulations
+            </p>
+            <p className="text-sm font-mono bg-blue-50 text-blue-700 px-3 py-2 rounded-lg">
+              GSTIN: 21EOUPS1807D1ZX
+            </p>
+          </div>
+
         </div>
       </div>
     </section>

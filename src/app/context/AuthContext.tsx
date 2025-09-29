@@ -6,280 +6,196 @@ import {
   onAuthStateChanged,
   signOut,
   User,
-  GoogleAuthProvider,
-  signInWithRedirect,
-  signInWithPopup,
-  getRedirectResult,
-  setPersistence,
-  browserLocalPersistence,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+  updateProfile,
+  sendSignInLinkToEmail,
+  isSignInWithEmailLink,
+  signInWithEmailLink,
 } from "firebase/auth";
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  logout: () => void;
-  loginWithGoogle: () => Promise<void>;
+  signup: (email: string, password: string, displayName?: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
+  sendMagicLink: (email: string) => Promise<void>;
+  completeMagicLinkSignIn: (email: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
-  logout: () => {},
-  loginWithGoogle: async () => {},
+  signup: async () => {},
+  login: async () => {},
+  logout: async () => {},
+  resetPassword: async () => {},
+  sendMagicLink: async () => {},
+  completeMagicLinkSignIn: async () => {},
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [redirectChecked, setRedirectChecked] = useState(false);
 
   useEffect(() => {
-    console.log("============================================");
-    console.log("AUTH PROVIDER MOUNTED");
-    console.log("Timestamp:", new Date().toISOString());
-    console.log("User Agent:", navigator.userAgent);
-    console.log("Current URL:", window.location.href);
-    console.log("Referrer:", document.referrer);
-    console.log("============================================");
-
-    // Initialize auth
-    const initAuth = async () => {
-      try {
-        // Set persistence BEFORE checking redirect result
-        console.log("Setting up auth persistence...");
-        await setPersistence(auth, browserLocalPersistence);
-        console.log("✅ Persistence set to browserLocalPersistence");
-
-        // Log Firebase configuration
-        console.log("🔧 Firebase Config:");
-        console.log("  Auth domain:", auth.config.authDomain);
-        console.log("  API key exists:", !!auth.config.apiKey);
-        console.log("  Current origin:", window.location.origin);
-        console.log("  Current hostname:", window.location.hostname);
-
-        // Check if we're returning from a redirect
-        const urlParams = new URLSearchParams(window.location.search);
-        const hasAuthParams = window.location.href.includes('google') || 
-                             document.referrer.includes('google') ||
-                             urlParams.has('state') ||
-                             urlParams.has('code');
-        
-        console.log("🔍 Checking for redirect indicators:");
-        console.log("  - Has auth params:", hasAuthParams);
-        console.log("  - URL contains 'google':", window.location.href.includes('google'));
-        console.log("  - Referrer contains 'google':", document.referrer.includes('google'));
-        console.log("  - URL params:", Array.from(urlParams.keys()).join(', ') || 'none');
-
-        // Check for redirect result
-        console.log("⏳ Checking for redirect result...");
-        const result = await getRedirectResult(auth);
-        setRedirectChecked(true);
-        
-        console.log("============================================");
-        console.log("REDIRECT RESULT RECEIVED");
-        console.log("Timestamp:", new Date().toISOString());
-        console.log("Result exists:", !!result);
-        
-        if (result && result.user) {
-          console.log("✅ SUCCESS - User authenticated via redirect!");
-          console.log("Result Details:");
-          console.log("  User:", result.user.email || "null");
-          console.log("  Operation Type:", result.operationType || "unknown");
-          console.log("  Provider ID:", result.providerId || "unknown");
-          
-          console.log("User from redirect:");
-          console.log("  UID:", result.user.uid);
-          console.log("  Email:", result.user.email);
-          console.log("  Display Name:", result.user.displayName);
-          
-          // Explicitly set user state from redirect
-          setUser(result.user);
-          setLoading(false);
-        } else {
-          console.log("ℹ️ No redirect result found");
-          if (hasAuthParams) {
-            console.warn("⚠️ WARNING: Auth params detected but no result. Possible issues:");
-            console.warn("  1. Firebase config mismatch");
-            console.warn("  2. Authorized domains not configured");
-            console.warn("  3. API key restrictions");
-          }
-        }
-        console.log("============================================");
-      } catch (err) {
-        console.error("============================================");
-        console.error("❌ REDIRECT ERROR");
-        console.error("Timestamp:", new Date().toISOString());
-        
-        const error = err as { code?: string; message?: string };
-        if (error.code) {
-          console.error("Error Code:", error.code);
-        }
-        if (error.message) {
-          console.error("Error Message:", error.message);
-        }
-        console.error("Full Error:", err);
-        
-        // Common error codes and solutions
-        if (error.code === 'auth/unauthorized-domain') {
-          console.error("🔧 FIX: Add your domain to Firebase Console → Authentication → Settings → Authorized domains");
-        } else if (error.code === 'auth/operation-not-allowed') {
-          console.error("🔧 FIX: Enable Google Sign-In in Firebase Console → Authentication → Sign-in method");
-        }
-        
-        console.error("============================================");
-        setRedirectChecked(true);
-        setLoading(false);
-      }
-    };
-
-    // Run initialization
-    initAuth();
-
-    // Set up auth state listener
-    console.log("👂 Setting up onAuthStateChanged listener...");
+    // Listen for auth state changes
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      console.log("--------------------------------------------");
-      console.log("🔔 AUTH STATE CHANGED EVENT");
-      console.log("Timestamp:", new Date().toISOString());
-      console.log("User exists:", !!firebaseUser);
-      console.log("Redirect checked:", redirectChecked);
-      
-      if (firebaseUser) {
-        console.log("✅ User authenticated:");
-        console.log("  UID:", firebaseUser.uid);
-        console.log("  Email:", firebaseUser.email);
-        console.log("  Display Name:", firebaseUser.displayName);
-        console.log("  Photo URL:", firebaseUser.photoURL);
-        console.log("  Email Verified:", firebaseUser.emailVerified);
-        console.log("  Provider Data:", JSON.stringify(firebaseUser.providerData));
-      } else {
-        console.log("❌ User is NULL");
-      }
-      
       setUser(firebaseUser);
-      // Only set loading false if redirect was already checked
-      if (redirectChecked) {
-        setLoading(false);
-      }
-      console.log("--------------------------------------------");
+      setLoading(false);
     });
 
-    // Check localStorage/sessionStorage
-    console.log("💾 Checking storage...");
+    return () => unsubscribe();
+  }, []);
+
+  // Sign up with email and password
+  const signup = async (email: string, password: string, displayName?: string) => {
     try {
-      console.log("localStorage available:", !!window.localStorage);
-      console.log("sessionStorage available:", !!window.sessionStorage);
+      const result = await createUserWithEmailAndPassword(auth, email, password);
       
-      // Check for Firebase auth keys
-      const allKeys = Object.keys(localStorage);
-      const authKeys = allKeys.filter(key => 
-        key.includes('firebase') || key.includes('auth')
-      );
-      console.log("All localStorage keys:", allKeys.length);
-      console.log("Firebase auth keys in localStorage:", authKeys);
-      
-      if (authKeys.length > 0) {
-        authKeys.forEach(key => {
-          const value = localStorage.getItem(key);
-          if (value) {
-            console.log(`  ${key}: ${value.substring(0, 50)}...`);
-          }
-        });
-      } else {
-        console.log("⚠️ No Firebase auth keys found in localStorage");
+      // Update display name if provided
+      if (displayName && result.user) {
+        await updateProfile(result.user, { displayName });
       }
-    } catch (storageError) {
-      console.error("Storage check error:", storageError);
+    } catch (error) {
+      const err = error as { code?: string; message?: string };
+      
+      // Handle common errors
+      if (err.code === 'auth/email-already-in-use') {
+        throw new Error('This email is already registered');
+      } else if (err.code === 'auth/weak-password') {
+        throw new Error('Password should be at least 6 characters');
+      } else if (err.code === 'auth/invalid-email') {
+        throw new Error('Invalid email address');
+      } else {
+        throw new Error(err.message || 'Failed to create account');
+      }
     }
+  };
 
-    return () => {
-      console.log("🔌 AUTH PROVIDER UNMOUNTING");
-      unsubscribe();
-    };
-  }, [redirectChecked]);
+  // Login with email and password
+  const login = async (email: string, password: string) => {
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (error) {
+      const err = error as { code?: string; message?: string };
+      
+      // Handle common errors
+      if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+        throw new Error('Invalid email or password');
+      } else if (err.code === 'auth/invalid-email') {
+        throw new Error('Invalid email address');
+      } else if (err.code === 'auth/too-many-requests') {
+        throw new Error('Too many failed attempts. Please try again later');
+      } else {
+        throw new Error(err.message || 'Failed to login');
+      }
+    }
+  };
 
+  // Logout
   const logout = async () => {
-    console.log("============================================");
-    console.log("🚪 LOGOUT INITIATED");
     try {
       await signOut(auth);
-      setUser(null);
-      console.log("✅ Logout successful");
     } catch (error) {
-      console.error("❌ Logout error:", error);
+      const err = error as { message?: string };
+      throw new Error(err.message || 'Failed to logout');
     }
-    console.log("============================================");
   };
 
-  const loginWithGoogle = async () => {
-    console.log("============================================");
-    console.log("🔐 LOGIN WITH GOOGLE INITIATED");
-    console.log("Timestamp:", new Date().toISOString());
-    console.log("Current location:", window.location.href);
-    
-    const provider = new GoogleAuthProvider();
-    provider.addScope('email');
-    provider.addScope('profile');
-    
-    // Force account selection
-    provider.setCustomParameters({
-      prompt: 'select_account'
-    });
-    
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-    console.log("📱 Device info:");
-    console.log("  Is Mobile:", isMobile);
-    console.log("  Is iOS:", isIOS);
-    console.log("  User Agent:", navigator.userAgent);
-    
+  // Reset password
+  const resetPassword = async (email: string) => {
     try {
-      // Set persistence before attempting login
-      console.log("Setting persistence...");
-      await setPersistence(auth, browserLocalPersistence);
-      console.log("✅ Persistence set");
+      await sendPasswordResetEmail(auth, email);
+    } catch (error) {
+      const err = error as { code?: string; message?: string };
       
-      // For mobile, always use redirect
-      // For desktop, use popup which is more reliable
-      if (isMobile) {
-        console.log("📲 Using signInWithRedirect for mobile...");
-        console.log("🚀 About to redirect...");
-        await signInWithRedirect(auth, provider);
+      if (err.code === 'auth/user-not-found') {
+        throw new Error('No account found with this email');
+      } else if (err.code === 'auth/invalid-email') {
+        throw new Error('Invalid email address');
       } else {
-        console.log("💻 Using signInWithPopup for desktop...");
-        const result = await signInWithPopup(auth, provider);
-        console.log("✅ Popup login successful");
-        console.log("User:", result.user.email);
+        throw new Error(err.message || 'Failed to send reset email');
       }
-    } catch (err) {
-      console.error("============================================");
-      console.error("❌ LOGIN ERROR");
-      
-      const error = err as { code?: string; message?: string };
-      console.error("Error Code:", error.code);
-      console.error("Error Message:", error.message);
-      console.error("Full Error:", err);
-      
-      if (error.code === 'auth/unauthorized-domain') {
-        alert('Configuration error: This domain is not authorized. Please contact support.');
-        console.error('🔧 FIX: Check Firebase Console → Authentication → Settings → Authorized domains');
-        console.error('Make sure both kroztek.com and YOUR-PROJECT.firebaseapp.com are listed');
-      } else if (error.code === 'auth/popup-blocked') {
-        alert('Popup was blocked. Please allow popups for this site and try again.');
-      } else if (error.code === 'auth/cancelled-popup-request') {
-        console.log('ℹ️ User cancelled login');
-      } else {
-        alert('Login failed: ' + (error.message || 'Unknown error'));
-      }
-      console.error("============================================");
     }
-    console.log("============================================");
   };
 
-  console.log("🎨 RENDER - User:", user?.email || "null", "Loading:", loading);
+  // Send magic link for passwordless sign-in
+  const sendMagicLink = async (email: string) => {
+    try {
+      const actionCodeSettings = {
+        // URL to redirect back to after clicking the email link
+        url: window.location.origin + '/verify-email',
+        handleCodeInApp: true,
+      };
+
+      await sendSignInLinkToEmail(auth, email, actionCodeSettings);
+      
+      // Save the email locally so we can complete sign-in after redirect
+      window.localStorage.setItem('emailForSignIn', email);
+    } catch (error) {
+      const err = error as { code?: string; message?: string };
+      
+      if (err.code === 'auth/invalid-email') {
+        throw new Error('Invalid email address');
+      } else {
+        throw new Error(err.message || 'Failed to send magic link');
+      }
+    }
+  };
+
+  // Complete the magic link sign-in after clicking email link
+  const completeMagicLinkSignIn = async (email: string) => {
+    try {
+      // Confirm the link is a sign-in with email link
+      if (isSignInWithEmailLink(auth, window.location.href)) {
+        // Get the email if available from storage
+        let emailToUse = email;
+        if (!emailToUse) {
+          emailToUse = window.localStorage.getItem('emailForSignIn') || '';
+        }
+
+        if (!emailToUse) {
+          throw new Error('Please provide your email to complete sign in');
+        }
+
+        // Sign in with the email link
+        await signInWithEmailLink(auth, emailToUse, window.location.href);
+        
+        // Clear the email from storage
+        window.localStorage.removeItem('emailForSignIn');
+      } else {
+        throw new Error('Invalid sign-in link');
+      }
+    } catch (error) {
+      const err = error as { code?: string; message?: string };
+      
+      if (err.code === 'auth/invalid-action-code') {
+        throw new Error('This link has expired or already been used');
+      } else if (err.code === 'auth/invalid-email') {
+        throw new Error('Invalid email address');
+      } else {
+        throw new Error(err.message || 'Failed to complete sign in');
+      }
+    }
+  };
 
   return (
-    <AuthContext.Provider value={{ user, loading, logout, loginWithGoogle }}>
+    <AuthContext.Provider 
+      value={{ 
+        user, 
+        loading, 
+        signup, 
+        login, 
+        logout, 
+        resetPassword,
+        sendMagicLink,
+        completeMagicLinkSignIn
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

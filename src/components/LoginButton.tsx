@@ -1,25 +1,35 @@
 "use client";
 
+import Link from "next/link";
 import { useAuth } from "../app/context/AuthContext";
 
 export default function LoginButton() {
-  const { user, logout, loginWithGoogle, loading } = useAuth();
+  const { user, logout, loading } = useAuth();
 
-  if (loading) return <button>Loading...</button>;
+  if (loading) {
+    return <div className="px-4 py-2">Loading...</div>;
+  }
 
-  return user ? (
-    <button
-      onClick={logout}
-      className="px-4 py-2 bg-red-500 text-white rounded"
+  if (user) {
+    return (
+      <div className="flex items-center gap-4">
+        <span className="text-sm">Hi, {user.displayName || user.email}</span>
+        <button 
+          onClick={logout} 
+          className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+        >
+          Logout
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <Link 
+      href="/login" 
+      className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
     >
-      Logout
-    </button>
-  ) : (
-    <button
-      onClick={loginWithGoogle}
-      className="px-4 py-2 bg-blue-500 text-white rounded"
-    >
-      Login with Google
-    </button>
+      Login / Sign Up
+    </Link>
   );
 }

@@ -218,7 +218,14 @@ export default function ProductsContent() {
 // Separate row component with qty state
 function ProductRow({ product, addToCart }: ProductRowProps) {
   const [qty, setQty] = useState(1);
+const getFinalPrice = (price: number | string): number => {
+  const num = Number(price);
+  if (isNaN(num)) return 0;
 
+  const afterDiscount = num * 0.31; // -69%
+  const afterAddOne = afterDiscount * 1.01; // +1%
+  return Math.ceil(afterAddOne); // round UP
+};
   return (
     <>
       {/* Desktop Table Row */}
@@ -229,7 +236,7 @@ function ProductRow({ product, addToCart }: ProductRowProps) {
         </td>
         <td className="p-3 border">{typeof product.amps === 'string' ? product.amps : `${product.amps}`} A</td>
         <td className="p-3 border">
-          Rs.{product.price} + {product.gst}% GST
+          Rs.{getFinalPrice(product.price)} + {product.gst}% GST
         </td>
         <td className="p-3 border">
           <input
@@ -265,7 +272,7 @@ function ProductRow({ product, addToCart }: ProductRowProps) {
               </div>
 
               <div className="text-lg font-medium text-gray-900">
-                Rs.{product.price} + {product.gst}% GST
+                Rs.{getFinalPrice(product.price)} + {product.gst}% GST
               </div>
 
               <div className="flex items-center justify-between pt-2">
