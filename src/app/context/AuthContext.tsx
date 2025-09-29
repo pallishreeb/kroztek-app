@@ -188,12 +188,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log("Popup login successful");
         console.log("User:", result.user.email);
       }
-    } catch (err: any) {
-      console.error("LOGIN ERROR");
-      console.error("Error Code:", err.code);
-      console.error("Error Message:", err.message);
-      console.error("Full Error:", err);
-    }
+    } catch (err) {
+  console.error("LOGIN ERROR");
+  if (err instanceof Error) {
+    console.error("Error Message:", err.message);
+  }
+  console.error("Full Error:", err);
+}
+
     console.log("============================================");
   };
 
