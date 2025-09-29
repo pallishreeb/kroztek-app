@@ -31,6 +31,7 @@ const AuthContext = createContext<AuthContextType>({
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [redirectChecked, setRedirectChecked] = useState(false);
 
   useEffect(() => {
     console.log("============================================");
@@ -38,6 +39,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log("Timestamp:", new Date().toISOString());
     console.log("User Agent:", navigator.userAgent);
     console.log("Current URL:", window.location.href);
+    console.log("Referrer:", document.referrer);
     console.log("============================================");
 
     // Initialize auth
@@ -46,11 +48,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Set persistence BEFORE checking redirect result
         console.log("Setting up auth persistence...");
         await setPersistence(auth, browserLocalPersistence);
-        console.log("Persistence set to browserLocalPersistence");
+        console.log("✅ Persistence set to browserLocalPersistence");
 
-        // Check for redirect result AFTER persistence is set
-        console.log("Checking for redirect result...");
+        // Check if we're returning from a redirect
+        const urlParams = new URLSearchParams(window.location.search);
+        const hasAuthParams = window.location.href.includes('google') || 
+                             document.referrer.includes('google') ||
+                             urlParams.has('state') ||
+                             urlParams.has('code');
+        
+        console.log("🔍 Checking for redirect indicators:");
+        console.log("  - Has auth params:", hasAuthParams);
+        console.log("  - URL contains 'google':", window.location.href.includes('google'));
+        console.log("  - Referrer contains 'google':", document.referrer.includes('google'));
+
+        // Check for redirect result
+        console.log("⏳ Checking for redirect result...");
         const result = await getRedirectResult(auth);
+        setRedirectChecked(true);
         
         console.log("============================================");
         console.log("REDIRECT RESULT RECEIVED");
@@ -58,6 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log("Result exists:", !!result);
         
         if (result && result.user) {
+          console.log("✅ SUCCESS - User authenticated via redirect!");
           console.log("Result Details:");
           console.log("  User:", result.user.email || "null");
           console.log("  Operation Type:", result.operationType || "unknown");
@@ -72,12 +88,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(result.user);
           setLoading(false);
         } else {
-          console.log("No redirect result found");
+          console.log("ℹ️ No redirect result found");
+          if (hasAuthParams) {
+            console.warn("⚠️ WARNING: Auth params detected but no result. Possible issues:");
+            console.warn("  1. Firebase config mismatch");
+            console.warn("  2. Authorized domains not configured");
+            console.warn("  3. API key restrictions");
+          }
         }
         console.log("============================================");
       } catch (err) {
         console.error("============================================");
-        console.error("REDIRECT ERROR");
+        console.error("❌ REDIRECT ERROR");
         console.error("Timestamp:", new Date().toISOString());
         
         const error = err as { code?: string; message?: string };
@@ -88,7 +110,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.error("Error Message:", error.message);
         }
         console.error("Full Error:", err);
+        
+        // Common error codes and solutions
+        if (error.code === 'auth/unauthorized-domain') {
+          console.error("🔧 FIX: Add your domain to Firebase Console → Authentication → Settings → Authorized domains");
+        } else if (error.code === 'auth/operation-not-allowed') {
+          console.error("🔧 FIX: Enable Google Sign-In in Firebase Console → Authentication → Sign-in method");
+        }
+        
         console.error("============================================");
+        setRedirectChecked(true);
         setLoading(false);
       }
     };
@@ -97,107 +128,131 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     initAuth();
 
     // Set up auth state listener
-    console.log("Setting up onAuthStateChanged listener...");
+    console.log("👂 Setting up onAuthStateChanged listener...");
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       console.log("--------------------------------------------");
-      console.log("AUTH STATE CHANGED EVENT");
+      console.log("🔔 AUTH STATE CHANGED EVENT");
       console.log("Timestamp:", new Date().toISOString());
       console.log("User exists:", !!firebaseUser);
+      console.log("Redirect checked:", redirectChecked);
       
       if (firebaseUser) {
-        console.log("User Details:");
+        console.log("✅ User authenticated:");
         console.log("  UID:", firebaseUser.uid);
         console.log("  Email:", firebaseUser.email);
         console.log("  Display Name:", firebaseUser.displayName);
         console.log("  Photo URL:", firebaseUser.photoURL);
         console.log("  Email Verified:", firebaseUser.emailVerified);
-        console.log("  Provider Data:", firebaseUser.providerData);
+        console.log("  Provider Data:", JSON.stringify(firebaseUser.providerData));
       } else {
-        console.log("User is NULL");
+        console.log("❌ User is NULL");
       }
       
       setUser(firebaseUser);
-      setLoading(false);
+      // Only set loading false if redirect was already checked
+      if (redirectChecked) {
+        setLoading(false);
+      }
       console.log("--------------------------------------------");
     });
 
     // Check localStorage/sessionStorage
-    console.log("Checking storage...");
+    console.log("💾 Checking storage...");
     try {
       console.log("localStorage available:", !!window.localStorage);
       console.log("sessionStorage available:", !!window.sessionStorage);
       
       // Check for Firebase auth keys
-      const authKeys = Object.keys(localStorage).filter(key => 
+      const allKeys = Object.keys(localStorage);
+      const authKeys = allKeys.filter(key => 
         key.includes('firebase') || key.includes('auth')
       );
+      console.log("All localStorage keys:", allKeys.length);
       console.log("Firebase auth keys in localStorage:", authKeys);
       
       if (authKeys.length > 0) {
         authKeys.forEach(key => {
           const value = localStorage.getItem(key);
-          console.log(`  ${key}:`, value ? "exists" : "null");
+          if (value) {
+            console.log(`  ${key}: ${value.substring(0, 50)}...`);
+          }
         });
+      } else {
+        console.log("⚠️ No Firebase auth keys found in localStorage");
       }
     } catch (storageError) {
       console.error("Storage check error:", storageError);
     }
 
     return () => {
-      console.log("AUTH PROVIDER UNMOUNTING");
+      console.log("🔌 AUTH PROVIDER UNMOUNTING");
       unsubscribe();
     };
-  }, []);
+  }, [redirectChecked]);
 
   const logout = async () => {
     console.log("============================================");
-    console.log("LOGOUT INITIATED");
+    console.log("🚪 LOGOUT INITIATED");
     try {
       await signOut(auth);
       setUser(null);
-      console.log("Logout successful");
+      console.log("✅ Logout successful");
     } catch (error) {
-      console.error("Logout error:", error);
+      console.error("❌ Logout error:", error);
     }
     console.log("============================================");
   };
 
   const loginWithGoogle = async () => {
     console.log("============================================");
-    console.log("LOGIN WITH GOOGLE INITIATED");
+    console.log("🔐 LOGIN WITH GOOGLE INITIATED");
     console.log("Timestamp:", new Date().toISOString());
+    console.log("Current location:", window.location.href);
     
     const provider = new GoogleAuthProvider();
     provider.addScope('email');
     provider.addScope('profile');
     
-    // Force account selection
+    // Force account selection and ensure we get fresh credentials
     provider.setCustomParameters({
-      prompt: 'select_account'
+      prompt: 'select_account',
+      access_type: 'online'
     });
     
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    console.log("Is Mobile:", isMobile);
-    console.log("User Agent:", navigator.userAgent);
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    console.log("📱 Device info:");
+    console.log("  Is Mobile:", isMobile);
+    console.log("  Is iOS:", isIOS);
+    console.log("  User Agent:", navigator.userAgent);
     
     try {
-      // Set persistence before signing in
+      // Always set persistence before attempting login
       await setPersistence(auth, browserLocalPersistence);
-      console.log("Persistence confirmed before login");
+      console.log("✅ Persistence confirmed before login");
+      
+      // Mark that we're about to redirect
+      if (isMobile) {
+        sessionStorage.setItem('authRedirectPending', 'true');
+        sessionStorage.setItem('authRedirectTime', Date.now().toString());
+      }
       
       if (isMobile) {
-        console.log("Using signInWithRedirect for mobile...");
-        console.log("Current URL before redirect:", window.location.href);
+        console.log("📲 Using signInWithRedirect for mobile...");
+        console.log("🚀 Initiating redirect to Google...");
         await signInWithRedirect(auth, provider);
-        console.log("Redirect initiated (this line may not appear)");
+        // This line won't execute as the page will redirect
+        console.log("⚠️ This should not appear - redirect should have happened");
       } else {
-        console.log("Using signInWithPopup for desktop...");
+        console.log("💻 Using signInWithPopup for desktop...");
         const result = await signInWithPopup(auth, provider);
-        console.log("Popup login successful");
+        console.log("✅ Popup login successful");
         console.log("User:", result.user.email);
+        console.log("Provider:", result.providerId);
       }
     } catch (err) {
-      console.error("LOGIN ERROR");
+      console.error("============================================");
+      console.error("❌ LOGIN ERROR");
       
       const error = err as { code?: string; message?: string };
       if (error.message) {
@@ -208,17 +263,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       console.error("Full Error:", err);
       
-      // Provide user-friendly error message
+      // Clear redirect pending flag on error
+      sessionStorage.removeItem('authRedirectPending');
+      
+      // Provide user-friendly error messages
       if (error.code === 'auth/popup-blocked') {
         alert('Popup was blocked. Please allow popups for this site.');
       } else if (error.code === 'auth/cancelled-popup-request') {
-        console.log('User cancelled login');
+        console.log('ℹ️ User cancelled login');
+      } else if (error.code === 'auth/network-request-failed') {
+        alert('Network error. Please check your internet connection.');
+      } else if (error.code === 'auth/unauthorized-domain') {
+        console.error('🔧 Domain not authorized. Check Firebase Console.');
+        alert('Authentication error. Please contact support.');
+      } else {
+        alert('Login failed. Please try again.');
       }
+      console.error("============================================");
     }
     console.log("============================================");
   };
 
-  console.log("RENDER - User:", user?.email || "null", "Loading:", loading);
+  console.log("🎨 RENDER - User:", user?.email || "null", "Loading:", loading);
 
   return (
     <AuthContext.Provider value={{ user, loading, logout, loginWithGoogle }}>
