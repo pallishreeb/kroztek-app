@@ -3,14 +3,14 @@
 import { useState, useEffect } from "react";
 import { db } from "@/lib/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { useAuth } from "../context/AuthContext"; // 🔑 auth context
-import { useCart } from "../context/CartContext"; // 🔑 cart context
+import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/CartContext";
 import { useRouter } from "next/navigation";
 import LoginButton from "@/components/LoginButton";
 
 export default function CheckoutPage() {
-  const { cart, clearCart } = useCart(); // 🔑 get cart from context
-  const { user } = useAuth(); // 🔑 logged-in user info
+  const { cart, clearCart } = useCart();
+  const { user } = useAuth();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
@@ -34,17 +34,25 @@ export default function CheckoutPage() {
   const [showModal, setShowModal] = useState(false);
   const [transactionId, setTransactionId] = useState("");
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+
+  // Helper function to convert price to number
+  const toNumber = (price: string | number): number => {
+    return typeof price === 'string' ? parseFloat(price) : price;
+  };
+
   // Load billing email if user is logged in
   useEffect(() => {
     if (user?.email) {
-      setBilling((prev) => ({ ...prev, email: user.email || "" })); // Fix: Handle null case
+      setBilling((prev) => ({ ...prev, email: user.email || "" }));
     }
   }, [user]);
+
   useEffect(() => {
     if (user?.email && showLoginPrompt) {
       setShowLoginPrompt(false);
     }
   }, [user, showLoginPrompt]);
+
   const handleBillingChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -54,11 +62,12 @@ export default function CheckoutPage() {
   };
 
   const subtotal = cart.reduce(
-    (sum, item) => sum + item.quantity * parseFloat(item.product.price),
+    (sum, item) => sum + item.quantity * toNumber(item.product.price),
     0
   );
   const tax = subtotal * taxRate;
   const total = subtotal + tax + shippingCost;
+
   const validateBilling = () => {
     const requiredFields = [
       "firstName",
@@ -103,7 +112,7 @@ export default function CheckoutPage() {
       cart: cart.map((item) => ({
         id: item.product.id,
         name: item.product.name,
-        price: parseFloat(item.product.price),
+        price: toNumber(item.product.price),
         quantity: item.quantity,
         image: item.product.image,
       })),
@@ -123,7 +132,7 @@ export default function CheckoutPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          to: [billing.email, "kroztekintegratedsolution@gmail.com"], // customer + admin
+          to: [billing.email, "kroztekintegratedsolution@gmail.com"],
           subject: "Order Confirmation - Kroztek",
           message: `
           <h2>Thank you for your order, ${billing.firstName}!</h2>
@@ -138,7 +147,7 @@ export default function CheckoutPage() {
                   `<tr>
                      <td>${item.product.name}</td>
                      <td>${item.quantity}</td>
-                     <td>₹${item.product.price}</td>
+                     <td>₹${toNumber(item.product.price).toFixed(2)}</td>
                    </tr>`
               )
               .join("")}
@@ -171,7 +180,7 @@ export default function CheckoutPage() {
       console.error("Error saving order: ", error);
       alert("Something went wrong. Please try again!");
     } finally {
-      setLoading(false); // ✅ stop loading
+      setLoading(false);
     }
   };
 
@@ -301,7 +310,7 @@ export default function CheckoutPage() {
                   {item.product.name} × {item.quantity}
                 </span>
                 <span>
-                  ₹{(item.quantity * parseFloat(item.product.price)).toFixed(2)}
+                  ₹{(item.quantity * toNumber(item.product.price)).toFixed(2)}
                 </span>
               </div>
             ))
