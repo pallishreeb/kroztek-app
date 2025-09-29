@@ -97,7 +97,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (result) {
           console.log("Result Details:");
           console.log("  User:", result.user?.email || "null");
-          console.log("  Credential:", result.credential);
           console.log("  Operation Type:", result.operationType);
           console.log("  Provider ID:", result.providerId);
           
