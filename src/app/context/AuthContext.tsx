@@ -12,7 +12,6 @@ import {
   getRedirectResult,
   setPersistence,
   browserLocalPersistence,
-  indexedDBLocalPersistence,
 } from "firebase/auth";
 
 interface AuthContextType {
@@ -41,24 +40,61 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log("Current URL:", window.location.href);
     console.log("============================================");
 
-    // Set persistence first
-    const setupPersistence = async () => {
+    // Initialize auth
+    const initAuth = async () => {
       try {
+        // Set persistence BEFORE checking redirect result
         console.log("Setting up auth persistence...");
         await setPersistence(auth, browserLocalPersistence);
         console.log("Persistence set to browserLocalPersistence");
-      } catch (error) {
-        console.error("Failed to set persistence:", error);
-        try {
-          await setPersistence(auth, indexedDBLocalPersistence);
-          console.log("Fallback: Persistence set to indexedDBLocalPersistence");
-        } catch (fallbackError) {
-          console.error("Fallback persistence also failed:", fallbackError);
+
+        // Check for redirect result AFTER persistence is set
+        console.log("Checking for redirect result...");
+        const result = await getRedirectResult(auth);
+        
+        console.log("============================================");
+        console.log("REDIRECT RESULT RECEIVED");
+        console.log("Timestamp:", new Date().toISOString());
+        console.log("Result exists:", !!result);
+        
+        if (result && result.user) {
+          console.log("Result Details:");
+          console.log("  User:", result.user.email || "null");
+          console.log("  Operation Type:", result.operationType || "unknown");
+          console.log("  Provider ID:", result.providerId || "unknown");
+          
+          console.log("User from redirect:");
+          console.log("  UID:", result.user.uid);
+          console.log("  Email:", result.user.email);
+          console.log("  Display Name:", result.user.displayName);
+          
+          // Explicitly set user state from redirect
+          setUser(result.user);
+          setLoading(false);
+        } else {
+          console.log("No redirect result found");
         }
+        console.log("============================================");
+      } catch (err) {
+        console.error("============================================");
+        console.error("REDIRECT ERROR");
+        console.error("Timestamp:", new Date().toISOString());
+        
+        const error = err as { code?: string; message?: string };
+        if (error.code) {
+          console.error("Error Code:", error.code);
+        }
+        if (error.message) {
+          console.error("Error Message:", error.message);
+        }
+        console.error("Full Error:", err);
+        console.error("============================================");
+        setLoading(false);
       }
     };
 
-    setupPersistence();
+    // Run initialization
+    initAuth();
 
     // Set up auth state listener
     console.log("Setting up onAuthStateChanged listener...");
@@ -84,42 +120,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
       console.log("--------------------------------------------");
     });
-
-    // Check for redirect result
-    console.log("Checking for redirect result...");
-    getRedirectResult(auth)
-      .then((result) => {
-        console.log("============================================");
-        console.log("REDIRECT RESULT RECEIVED");
-        console.log("Timestamp:", new Date().toISOString());
-        console.log("Result exists:", !!result);
-        
-        if (result) {
-          console.log("Result Details:");
-          console.log("  User:", result.user?.email || "null");
-          console.log("  Operation Type:", result.operationType);
-          console.log("  Provider ID:", result.providerId);
-          
-          if (result.user) {
-            console.log("User from redirect:");
-            console.log("  UID:", result.user.uid);
-            console.log("  Email:", result.user.email);
-            console.log("  Display Name:", result.user.displayName);
-          }
-        } else {
-          console.log("No redirect result found");
-        }
-        console.log("============================================");
-      })
-      .catch((err) => {
-        console.error("============================================");
-        console.error("REDIRECT ERROR");
-        console.error("Timestamp:", new Date().toISOString());
-        console.error("Error Code:", err.code);
-        console.error("Error Message:", err.message);
-        console.error("Full Error:", err);
-        console.error("============================================");
-      });
 
     // Check localStorage/sessionStorage
     console.log("Checking storage...");
@@ -171,14 +171,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     provider.addScope('email');
     provider.addScope('profile');
     
+    // Force account selection
+    provider.setCustomParameters({
+      prompt: 'select_account'
+    });
+    
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     console.log("Is Mobile:", isMobile);
     console.log("User Agent:", navigator.userAgent);
     
     try {
+      // Set persistence before signing in
+      await setPersistence(auth, browserLocalPersistence);
+      console.log("Persistence confirmed before login");
+      
       if (isMobile) {
         console.log("Using signInWithRedirect for mobile...");
-        console.log("About to redirect...");
+        console.log("Current URL before redirect:", window.location.href);
         await signInWithRedirect(auth, provider);
         console.log("Redirect initiated (this line may not appear)");
       } else {
@@ -188,13 +197,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log("User:", result.user.email);
       }
     } catch (err) {
-  console.error("LOGIN ERROR");
-  if (err instanceof Error) {
-    console.error("Error Message:", err.message);
-  }
-  console.error("Full Error:", err);
-}
-
+      console.error("LOGIN ERROR");
+      
+      const error = err as { code?: string; message?: string };
+      if (error.message) {
+        console.error("Error Message:", error.message);
+      }
+      if (error.code) {
+        console.error("Error Code:", error.code);
+      }
+      console.error("Full Error:", err);
+      
+      // Provide user-friendly error message
+      if (error.code === 'auth/popup-blocked') {
+        alert('Popup was blocked. Please allow popups for this site.');
+      } else if (error.code === 'auth/cancelled-popup-request') {
+        console.log('User cancelled login');
+      }
+    }
     console.log("============================================");
   };
 
