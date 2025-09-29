@@ -50,6 +50,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await setPersistence(auth, browserLocalPersistence);
         console.log("✅ Persistence set to browserLocalPersistence");
 
+        // Log Firebase configuration
+        console.log("🔧 Firebase Config:");
+        console.log("  Auth domain:", auth.config.authDomain);
+        console.log("  API key exists:", !!auth.config.apiKey);
+        console.log("  Current origin:", window.location.origin);
+        console.log("  Current hostname:", window.location.hostname);
+
         // Check if we're returning from a redirect
         const urlParams = new URLSearchParams(window.location.search);
         const hasAuthParams = window.location.href.includes('google') || 
@@ -61,6 +68,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log("  - Has auth params:", hasAuthParams);
         console.log("  - URL contains 'google':", window.location.href.includes('google'));
         console.log("  - Referrer contains 'google':", document.referrer.includes('google'));
+        console.log("  - URL params:", Array.from(urlParams.keys()).join(', ') || 'none');
 
         // Check for redirect result
         console.log("⏳ Checking for redirect result...");
@@ -213,10 +221,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     provider.addScope('email');
     provider.addScope('profile');
     
-    // Force account selection and ensure we get fresh credentials
+    // Force account selection
     provider.setCustomParameters({
-      prompt: 'select_account',
-      access_type: 'online'
+      prompt: 'select_account'
     });
     
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -227,57 +234,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log("  User Agent:", navigator.userAgent);
     
     try {
-      // Always set persistence before attempting login
+      // Set persistence before attempting login
+      console.log("Setting persistence...");
       await setPersistence(auth, browserLocalPersistence);
-      console.log("✅ Persistence confirmed before login");
+      console.log("✅ Persistence set");
       
-      // Mark that we're about to redirect
-      if (isMobile) {
-        sessionStorage.setItem('authRedirectPending', 'true');
-        sessionStorage.setItem('authRedirectTime', Date.now().toString());
-      }
-      
+      // For mobile, always use redirect
+      // For desktop, use popup which is more reliable
       if (isMobile) {
         console.log("📲 Using signInWithRedirect for mobile...");
-        console.log("🚀 Initiating redirect to Google...");
+        console.log("🚀 About to redirect...");
         await signInWithRedirect(auth, provider);
-        // This line won't execute as the page will redirect
-        console.log("⚠️ This should not appear - redirect should have happened");
       } else {
         console.log("💻 Using signInWithPopup for desktop...");
         const result = await signInWithPopup(auth, provider);
         console.log("✅ Popup login successful");
         console.log("User:", result.user.email);
-        console.log("Provider:", result.providerId);
       }
     } catch (err) {
       console.error("============================================");
       console.error("❌ LOGIN ERROR");
       
       const error = err as { code?: string; message?: string };
-      if (error.message) {
-        console.error("Error Message:", error.message);
-      }
-      if (error.code) {
-        console.error("Error Code:", error.code);
-      }
+      console.error("Error Code:", error.code);
+      console.error("Error Message:", error.message);
       console.error("Full Error:", err);
       
-      // Clear redirect pending flag on error
-      sessionStorage.removeItem('authRedirectPending');
-      
-      // Provide user-friendly error messages
-      if (error.code === 'auth/popup-blocked') {
-        alert('Popup was blocked. Please allow popups for this site.');
+      if (error.code === 'auth/unauthorized-domain') {
+        alert('Configuration error: This domain is not authorized. Please contact support.');
+        console.error('🔧 FIX: Check Firebase Console → Authentication → Settings → Authorized domains');
+        console.error('Make sure both kroztek.com and YOUR-PROJECT.firebaseapp.com are listed');
+      } else if (error.code === 'auth/popup-blocked') {
+        alert('Popup was blocked. Please allow popups for this site and try again.');
       } else if (error.code === 'auth/cancelled-popup-request') {
         console.log('ℹ️ User cancelled login');
-      } else if (error.code === 'auth/network-request-failed') {
-        alert('Network error. Please check your internet connection.');
-      } else if (error.code === 'auth/unauthorized-domain') {
-        console.error('🔧 Domain not authorized. Check Firebase Console.');
-        alert('Authentication error. Please contact support.');
       } else {
-        alert('Login failed. Please try again.');
+        alert('Login failed: ' + (error.message || 'Unknown error'));
       }
       console.error("============================================");
     }
