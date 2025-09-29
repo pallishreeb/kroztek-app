@@ -6,10 +6,10 @@ import {
   onAuthStateChanged,
   signOut,
   User,
-  getRedirectResult,
   GoogleAuthProvider,
   signInWithRedirect,
   signInWithPopup,
+  getRedirectResult,
 } from "firebase/auth";
 
 interface AuthContextType {
@@ -31,34 +31,60 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Listen for auth state changes
+    const checkRedirect = async () => {
+      try {
+        console.log("🔍 Checking for redirect result...");
+        const result = await getRedirectResult(auth);
+
+        if (result?.user) {
+          console.log("✅ Redirect result user:", result.user);
+          setUser(result.user);
+        } else {
+          console.log("ℹ️ No redirect result user found");
+        }
+      } catch (err) {
+        console.error("❌ Redirect login error:", err);
+      }
+    };
+
+    checkRedirect();
+
+    console.log("👂 Setting up onAuthStateChanged listener...");
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      console.log("🔄 Auth state changed:", firebaseUser);
       setUser(firebaseUser);
       setLoading(false);
     });
 
-    // Handle redirect result (for mobile login)
-    getRedirectResult(auth)
-      .then((result) => {
-        if (result?.user) {
-          setUser(result.user);
-        }
-      })
-      .catch((err) => console.error("Redirect login error:", err));
-
-    return () => unsubscribe();
+    return () => {
+      console.log("🧹 Cleaning up auth listener");
+      unsubscribe();
+    };
   }, []);
 
-  const logout = () => signOut(auth);
+  const logout = async () => {
+    console.log("🚪 Logging out...");
+    await signOut(auth);
+    setUser(null);
+    console.log("✅ Logged out successfully");
+  };
 
   const loginWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
+    console.log("🔑 Starting Google login...");
+
     if (/Mobi|Android/i.test(navigator.userAgent)) {
-      // Redirect on mobile
+      console.log("📱 Mobile device detected → using redirect");
       await signInWithRedirect(auth, provider);
     } else {
-      // Popup on desktop
-      await signInWithPopup(auth, provider);
+      console.log("💻 Desktop detected → using popup");
+      try {
+        const result = await signInWithPopup(auth, provider);
+        console.log("✅ Popup login result user:", result.user);
+        setUser(result.user);
+      } catch (err) {
+        console.error("❌ Popup login error:", err);
+      }
     }
   };
 

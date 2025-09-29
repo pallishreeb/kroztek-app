@@ -33,20 +33,39 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
+// helper to calculate final rounded price
+// helper to calculate final rounded price
+const getFinalPrice = (price: number | string): number => {
+  const num = Number(price);
+  if (isNaN(num)) return 0;
 
-  const addToCart = (product: Product, quantity = 1) => {
-    setCart((prev) => {
-      const existing = prev.find((i) => i.product.id === product.id);
-      if (existing) {
-        return prev.map((i) =>
-          i.product.id === product.id
-            ? { ...i, quantity: i.quantity + quantity }
-            : i
-        );
-      }
-      return [...prev, { product, quantity }];
-    });
-  };
+  const afterDiscount = num * 0.31; // -69%
+  const afterAddOne = afterDiscount * 1.01; // +1%
+  return Math.ceil(afterAddOne); // round UP
+};
+
+const addToCart = (product: Product, quantity = 1) => {
+  setCart((prev: CartItem[]) => {
+    const existing = prev.find((i) => i.product.id === product.id);
+
+    if (existing) {
+      return prev.map((i) =>
+        i.product.id === product.id
+          ? { ...i, quantity: i.quantity + quantity }
+          : i
+      );
+    }
+
+    // overwrite price with final calculated one before storing
+    const updatedProduct: Product = {
+      ...product,
+      price: getFinalPrice(product.price),
+    };
+
+    return [...prev, { product: updatedProduct, quantity }];
+  });
+};
+
 
   const removeFromCart = (id: string) => {
     setCart((prev) => prev.filter((i) => i.product.id !== id));

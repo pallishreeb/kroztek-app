@@ -226,14 +226,18 @@ const calculateAmount = (price: string) => {
   const afterDiscount = base * 0.31; // -69%
   const afterAddOne = afterDiscount * 1.01; // +1%
 
-  // Format with commas and two decimals
-  const formatted = afterAddOne.toLocaleString("en-IN", {
+  // Round UP to nearest whole number
+  const rounded = Math.ceil(afterAddOne);
+
+  // Format with commas and ".00"
+  const formatted = rounded.toLocaleString("en-IN", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
 
   return `Rs.${formatted}`;
 };
+
 
 
   return (

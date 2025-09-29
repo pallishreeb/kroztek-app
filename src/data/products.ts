@@ -2,7 +2,7 @@ export type Product = {
   id: string;
   name: string;
   category: "vsx" | "m20" | "vsm" | "vsr" | "vss";
-  price: string;
+  price: number | string;
   description: string;
   image: string;
   range?: string;   
