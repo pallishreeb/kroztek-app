@@ -13,13 +13,10 @@ export default function HomePage() {
   return (
     <div className="space-y-12">
       <Carousel />
-
-      {/* <SearchBar /> */}
-      <GuideCTA />
-
+      <Counter />
       <ProductCarousel />
       <WhyChooseUs />
-      <Counter />
+      <GuideCTA />
 
       {/* <Testimonials /> */}
 
