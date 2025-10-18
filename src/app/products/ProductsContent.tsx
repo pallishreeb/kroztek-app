@@ -261,13 +261,6 @@ const getFinalPrice = (price: number | string): number => {
     `Hello Kroztek Team 👋,
 I'm interested in the ${product.model} (${product.kw} kW / ${product.hp} HP) model.
 Price mentioned: Rs.${getFinalPrice(product.price)} + ${product.gst}% GST per unit.
-
-Please confirm the following:
-1️⃣ Quantity I want to order: [Please enter]
-2️⃣ Delivery address: [Optional]
-
-📦 *Note:* Delivery charges will be extra.
-
 Thank you!`
   )}`}
   target="_blank"
