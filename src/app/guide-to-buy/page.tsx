@@ -1,50 +1,38 @@
+/** @format */
 "use client";
 
-import { ShoppingCart, Package, CreditCard, FileText, Phone, CheckCircle } from "lucide-react";
+import { ShoppingCart, Phone, CheckCircle, Package } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export default function GuideToBuyPage() {
-  
   const steps = [
     {
       icon: ShoppingCart,
       title: "1. Browse Products",
       description:
-        "From the navigation menu, choose a category like VSX, VSM, or others. Explore the products and click on a product to view details.",
-    },
-    {
-      icon: Package,
-      title: "2. Add to Cart",
-      description:
-        "Select the desired quantity and click 'Add to Cart'. When ready, open your cart and proceed to checkout.",
-    },
-    {
-      icon: CreditCard,
-      title: "3. Checkout & Payment",
-      description:
-        "Fill in your billing details and address. Pay using the provided account details, QR code, or UPI. Then click 'I Have Paid', enter your Transaction ID, and confirm your order.",
-    },
-    {
-      icon: FileText,
-      title: "4. Order Confirmation",
-      description:
-        "Once confirmed, your order will appear on the 'My Orders' page with invoice details available for download. You’ll also receive an email notification.",
-    },
-    {
-      icon: Package,
-      title: "5. Dispatch & Delivery",
-      description:
-        "We dispatch through trusted couriers. The courier bill will be shared with you, and you only pay the actual delivery charges at the time of dispatch. This ensures full transparency.",
+        "Explore our range of products from the navigation menu — such as VSX, VSM, or VSS series. Click on any product to view its specifications and price.",
     },
     {
       icon: Phone,
-      title: "6. Support Anytime",
+      title: "2. Contact Us to Place Order",
       description:
-        "If you have any doubts, call us anytime at +91 863741899. We are here to help you at every step.",
+        "Once you’ve chosen your product, call us directly at +91 8637214899 or click on the WhatsApp icon on the product page to connect with our team.",
+    },
+    {
+      icon: Package,
+      title: "3. Share Details & Confirm",
+      description:
+        "We’ll ask for your delivery address and other details over call or WhatsApp. Based on your location, we’ll calculate the final amount including shipment charges.",
+    },
+    {
+      icon: CheckCircle,
+      title: "4. Final Payment & Dispatch",
+      description:
+        "Once you confirm the order and payment, we’ll dispatch the product via trusted courier services. You’ll get full shipment details for transparency.",
     },
   ];
 
-    // Counters for delivered products
+  // Counters for delivered products
   const [counts, setCounts] = useState({ vsm: 0, vsx: 0, other: 0 });
 
   useEffect(() => {
@@ -61,15 +49,15 @@ export default function GuideToBuyPage() {
     }, 50);
     return () => clearInterval(interval);
   }, []);
+
   return (
     <div className="container mx-auto px-6 py-12">
       <h1 className="text-3xl md:text-4xl font-bold text-center mb-8 text-indigo-700">
-        Guide to Buy
+        How to Buy
       </h1>
       <p className="text-center max-w-3xl mx-auto text-gray-600 mb-12">
-        To make your purchase process smooth and transparent, here’s a simple
-        step-by-step guide. Follow these steps to place your order with
-        confidence.
+        For now, all purchases are handled personally to ensure smooth delivery
+        and accurate pricing. Follow these simple steps to place your order.
       </p>
 
       <div className="space-y-10">
@@ -95,13 +83,13 @@ export default function GuideToBuyPage() {
           Transparent Shipping Policy
         </h2>
         <p className="text-gray-700 max-w-2xl mx-auto">
-          We do not charge any hidden delivery fees. You only pay the actual
-          courier charges as per the bill, ensuring complete transparency and
-          fairness in pricing.
+          We calculate shipping charges based on your delivery location and only
+          charge the actual courier cost. No hidden delivery fees — complete
+          transparency in pricing.
         </p>
       </div>
 
-            {/* Counters */}
+      {/* Counters */}
       <h2 className="text-2xl font-bold text-center text-gray-800 mb-8 mt-8">
         📦 Delivered Products So Far
       </h2>

@@ -5,64 +5,46 @@ import { useState } from "react";
 
 const faqs = [
   {
-    question: "What is your warranty?",
-    answer: `IDR provides a one-year warranty on all newly installed cabling and hardware. For some of cabling projects we can offer up to a 25 year warranty through the manufacturer if we use their solution from end to end. Warranty covers parts and labor. Warranty Exclusions include: Defects and damages caused by improper use, tampering, theft, fire, water or natural disaster.
+    question: "How can I place an order?",
+    answer: `Currently, we are accepting orders only through direct call or WhatsApp. 
+You can browse the products on our website, note the model you’re interested in, and contact us at +91 8637214899 or via WhatsApp to place your order. 
+Our team will assist you with price, availability, and delivery details.`,
+  },
+  {
+    question: "Do you provide shipping across India?",
+    answer: `Yes, we ship all over India through trusted courier partners. 
+Shipping cost depends on your location and product weight, which we calculate after receiving your address. 
+You only pay the actual courier charge — no hidden fees.`,
+  },
+  {
+    question: "What brands do you deal with?",
+    answer: `We are specialized in supplying Crompton Greaves (CG Emotron) industrial products including VSX, VSM, and VSS series AC Drives. 
+We are also expanding to other industrial automation and electrical equipment categories.`,
+  },
+  {
+    question: "What warranty do your products carry?",
+    answer: `All products come with a standard manufacturer warranty as per brand policy. 
+Typically, Crompton Emotron drives include a 12-month warranty from the date of purchase. 
+Warranty terms vary depending on the product and brand.`,
+  },
+  {
+    question: "Can I get a GST invoice for my purchase?",
+    answer: `Yes, every order comes with a valid GST invoice. 
+Once your order is confirmed and payment completed, we will share the invoice via email or WhatsApp before dispatch.`,
+  },
+  {
+    question: "Do you offer installation or service support?",
+    answer: `For bulk or industrial orders, we can assist in connecting you with authorized service or installation partners. 
+We also provide remote guidance for configuration or setup if required.`,
+  },
+  {
+    question: "How can I contact Kroztek?",
+    answer: `You can reach us easily via:
+- 📞 Call: +91 8637214899  
+- 💬 WhatsApp: Click the icon on any product page  
+- ✉️ Email: support@kroztek.com  
 
-All configuration services are covered by our 30 day warranty. During which time you may request minor configuration changes that do not require a complete system redesign.`,
-  },
-  {
-    question: "Do you offer financing?",
-    answer:
-      "Yes, IDR works with third party finance vendors who can help to provide you with financing offers for deals of at least $1,000 in value.",
-  },
-  {
-    question: "What are your normal hours of service:",
-    answer:
-      "IDR typically operates on a schedule of Monday through Friday between 7:00 a.m. to 6:00 p.m. We do schedule service during off hours but typically need advanced notice to schedule outside of our normal operating hours.",
-  },
-  {
-    question:
-      "I hear a lot about the cloud, what are the benefits of a cloud solution?",
-    answer:
-      "There are many benefits of using a cloud solution as opposed to a traditional security or network offering. For starters, the ease of management. You can access your cloud equipment and manage them from anywhere in the world with an internet capable device. For customers with many locations, you can have one single sign-on making it easy to manage all of your locations. Faster application velocity, you can begin deployment immediately and deploy apps quickly. With cloud solutions your firmware will always be up to date with automatic updating, which eliminates the need for constant basic maintenance, and even worrying about changes in technology making your traditional software obsolete.",
-  },
-  {
-    question: "Do you offer security alarm monitoring services?",
-    answer:
-      "Yes IDR is partnered with MetroDial to offer these services. We are able to provide affordable and reliable monitoring through our partnership with MetroDial. MetroDial also has two central stations established on two completely separate power grids, which allows them to stay up at all times for all customers even during a power outage event.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus eu tortor sed justo interdum consectetur.",
-  },
-  {
-    question: "Do you sell hardware?",
-    answer:
-      "Absolutely! We love selling hardware. We sell a large array of products including but not limited to, computers, chromebooks, servers, UPS and PDU’s, racks, ladder racks, security cameras, access control equipment, video displays, software and more!",
-  },
-  {
-    question: "How do I place an order / schedule service?",
-    answer:
-      "You can call an order in by calling either our NYC or NJ office, or e-mail us at sales@idrtechnologysolutions.com. Existing clients can also contact their dedicated project manager or sales associate.",
-  },
-  {
-    question: "What is your response time for a serious event?",
-    answer:
-      "For most responses we will schedule a technician within a 5 business days. In some instances if you have an emergency such as a door not being locked we will respond within 24-hours.",
-  },
-  {
-    question: "Do you offer service agreements?",
-    answer:
-      "Yes, we offer service agreements for security systems and network support.  IDR is fully staffed with in-house support and service division.   All our technicians go through extensive training.   Service clients data is all documented in our service portal so you can see a history of service, even by the device! ",
-  },
-  {
-    question: "What are the benefits of Service Agreements?",
-    answer: `Faster Response Time, IDR prioritizes our clients who have service agreements, and for emergency service such as doors not locking or unlocking we will be there same day.
-
-Weekend Emergency Service
-While IDR only operates on a M-F schedule, we have technicians on call for weekend emergency service, this service is only available to our service agreement customers.
-
-IDR handles everything
-With a service agreement, if the parts are covered by the manufacturer, w handle the entire RMA process down to shipping and receiving, and reinstallation and programming.
-
-Free Support
-While IDR supports all of our clients for a limited amount of time post installation, those who have service agreements receive free support including configuration changes and pulling surveillance footage etc.`,
+We are available Monday to Saturday, 9:00 AM – 7:00 PM.`,
   },
 ];
 

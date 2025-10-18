@@ -110,13 +110,13 @@ export default function WhyChoose() {
                 <div className="h-1 w-12 bg-gradient-to-r from-amber-500 to-amber-600 rounded-full"></div>
               </div>
               <h3 className="text-xl font-bold text-gray-800 mb-3">
-                Authorized Service
+                Authorized Service Center
               </h3>
               <p className="text-gray-600 mb-4">
                 Our skilled team ensures professional installation, maintenance, and timely service for all equipment.
               </p>
               <div className="pt-4 border-t border-gray-100">
-                <p className="text-sm text-amber-600 font-semibold">
+                <p className="text-sm text-green-600 font-semibold">
                   ✓ Service Certificate Verified
                 </p>
               </div>
@@ -166,9 +166,9 @@ export default function WhyChoose() {
                 Fully compliant with Indian tax regulations, ensuring transparent and legitimate business operations.
               </p>
               <div className="pt-4 border-t border-gray-100">
-                <p className="text-xs text-gray-500 mb-1">GSTIN</p>
-                <p className="text-sm font-mono bg-blue-50 text-blue-700 px-3 py-2 rounded-lg inline-block">
-                  21EOUPS1807D1ZX
+                {/* <p className="text-xs text-gray-500 mb-1">GSTIN</p> */}
+                <p className="text-sm font-mono bg-blue-50 text-green-600 px-3 py-2 rounded-lg inline-block">
+                  GSTIN:21EOUPS1807D1ZX
                 </p>
               </div>
             </div>

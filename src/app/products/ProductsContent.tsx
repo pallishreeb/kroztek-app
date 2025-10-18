@@ -1,6 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
+import { Phone, MessageCircle } from "lucide-react";
 import { products, type Product } from "@/data/products";
 import Link from "next/link";
 import Image from "next/image";
@@ -123,8 +124,9 @@ export default function ProductsContent() {
                 <th className="p-3 border">KW / HP</th>
                 <th className="p-3 border">Current</th>
                 <th className="p-3 border">Price</th>
-                <th className="p-3 border">Quantity</th>
-                <th className="p-3 border">Action</th>
+                <th className="p-3 border">Contact to Buy</th>
+                {/* <th className="p-3 border">Quantity</th>
+                <th className="p-3 border">Action</th> */}
               </tr>
             </thead>
             <tbody>
@@ -163,14 +165,14 @@ export default function ProductsContent() {
           </ul>
         </section>
       )}
-
+ 
       {/* Overview */}
-      {categoryInfo.description && (
+      {/* {categoryInfo.description && (
         <section className="bg-gray-50 p-6 rounded-lg mb-6">
           <h2 className="text-xl font-semibold mb-4">Product Overview</h2>
           <p>{categoryInfo.description}</p>
         </section>
-      )}
+      )} */}
 
       {/* Key Features */}
       {categoryInfo.features && categoryInfo.features.length > 0 && (
@@ -222,10 +224,14 @@ const getFinalPrice = (price: number | string): number => {
   const num = Number(price);
   if (isNaN(num)) return 0;
 
-  const afterDiscount = num * 0.31; // -69%
-  const afterAddOne = afterDiscount * 1.01; // +1%
-  return Math.ceil(afterAddOne); // round UP
+  const afterDiscount = num * 0.31; // apply -69%
+  const afterAddOne = afterDiscount * 1.01; // add +1%
+  const rounded = Math.ceil(afterAddOne); // round up
+  const withMarkup = rounded * 1.15; // add +15%
+
+  return Math.ceil(withMarkup); // final rounded value
 };
+
   return (
     <>
       {/* Desktop Table Row */}
@@ -238,7 +244,42 @@ const getFinalPrice = (price: number | string): number => {
         <td className="p-3 border">
           Rs.{getFinalPrice(product.price)} + {product.gst}% GST
         </td>
-        <td className="p-3 border">
+         {/* Action Buttons */}
+  <td className="p-3 border text-center space-x-3">
+    {/* Call Button */}
+    <a
+      href="tel:+918637214899"
+      className="inline-flex items-center justify-center p-2 bg-blue-50 text-blue-600 rounded-full hover:bg-blue-100 transition-colors"
+      title="Call for enquiry"
+    >
+      <Phone size={18} />
+    </a>
+
+    {/* WhatsApp Button */}
+<a
+  href={`https://wa.me/918637214899?text=${encodeURIComponent(
+    `Hello Kroztek Team 👋,
+I'm interested in the ${product.model} (${product.kw} kW / ${product.hp} HP) model.
+Price mentioned: Rs.${getFinalPrice(product.price)} + ${product.gst}% GST per unit.
+
+Please confirm the following:
+1️⃣ Quantity I want to order: [Please enter]
+2️⃣ Delivery address: [Optional]
+
+📦 *Note:* Delivery charges will be extra.
+
+Thank you!`
+  )}`}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="inline-flex items-center justify-center p-2 bg-green-50 text-green-600 rounded-full hover:bg-green-100 transition-colors"
+  title="WhatsApp enquiry"
+>
+  <MessageCircle size={18} />
+</a>
+
+  </td>
+        {/* <td className="p-3 border">
           <input
             type="number"
             value={qty}
@@ -254,7 +295,7 @@ const getFinalPrice = (price: number | string): number => {
           >
             Add to Cart
           </button>
-        </td>
+        </td> */}
       </tr>
 
       {/* Mobile Card Layout */}
@@ -275,7 +316,7 @@ const getFinalPrice = (price: number | string): number => {
                 Rs.{getFinalPrice(product.price)} + {product.gst}% GST
               </div>
 
-              <div className="flex items-center justify-between pt-2">
+              {/* <div className="flex items-center justify-between pt-2">
                 <div className="flex items-center gap-2">
                   <label className="text-sm font-medium">Qty:</label>
                   <input
@@ -294,7 +335,7 @@ const getFinalPrice = (price: number | string): number => {
                 >
                   Add to Cart
                 </button>
-              </div>
+              </div> */}
             </div>
           </div>
         </td>

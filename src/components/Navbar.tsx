@@ -33,8 +33,9 @@ export default function Navbar() {
         { name: "VSR", path: "/products?cat=vsr" },
       ],
     },
-    { name: "Orders", path: "/orders" },
+    // { name: "Orders", path: "/orders" },
     { name: "Guide to Buy", path: "/guide-to-buy" },
+    { name: "Contact", path: "/contact" },
   ];
 
   const totalQuantity = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -184,7 +185,7 @@ export default function Navbar() {
               )}
 
               {/* Desktop Cart */}
-              <Link
+              {/* <Link
                 href="/cart"
                 className="relative flex items-center px-3 lg:px-4 py-2 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-all duration-200 ml-2"
               >
@@ -194,10 +195,10 @@ export default function Navbar() {
                     {totalQuantity}
                   </span>
                 )}
-              </Link>
+              </Link> */}
 
               {/* Desktop User Section */}
-              <div className="flex items-center gap-3 ml-2 pl-3 border-l border-gray-200">
+              {/* <div className="flex items-center gap-3 ml-2 pl-3 border-l border-gray-200">
                 {user && (
                   <img
                     src={user.photoURL || "/default-avatar.png"}
@@ -206,20 +207,20 @@ export default function Navbar() {
                   />
                 )}
                 <LoginButton />
-              </div>
+              </div> */}
             </div>
 
             {/* Mobile menu buttons */}
             <div className="md:hidden flex items-center gap-3">
               {/* Mobile Cart Button */}
-              <Link href="/cart" className="relative flex items-center p-2 rounded-lg hover:bg-gray-100 transition-colors">
+              {/* <Link href="/cart" className="relative flex items-center p-2 rounded-lg hover:bg-gray-100 transition-colors">
                 <ShoppingCart size={22} />
                 {totalQuantity > 0 && (
                   <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs min-w-[18px] h-[18px] flex items-center justify-center rounded-full font-semibold">
                     {totalQuantity}
                   </span>
                 )}
-              </Link>
+              </Link> */}
 
               {/* Hamburger Menu Button */}
               <button
@@ -265,7 +266,7 @@ export default function Navbar() {
         <div className="flex flex-col h-full">
           <div className="flex-1 overflow-y-auto">
             {/* User Section */}
-            {user ? (
+            {/* {user ? (
               <div className="p-4 bg-gradient-to-br from-blue-50 to-white border-b flex items-center gap-3">
                 <img
                   src={user.photoURL || "/default-avatar.png"}
@@ -281,7 +282,7 @@ export default function Navbar() {
               <div className="p-4 border-b">
                 <LoginButton />
               </div>
-            )}
+            )} */}
 
             {/* Navigation Links */}
             <nav className="p-4 space-y-1">

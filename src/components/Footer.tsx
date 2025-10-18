@@ -73,7 +73,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  href="#"
+                  href="/privacy-policy"
                   className="text-sm 2xl:text-base text-[#F7F6F2] hover:text-white transition"
                 >
                   Privacy Policy
