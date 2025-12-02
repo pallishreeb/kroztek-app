@@ -1,6 +1,6 @@
-import { products, Product } from "@/data/products";
 import ProductDetailClient from "./ProductDetailClient";
 import Link from "next/link";
+import { getProductById } from "@/lib/products";
 
 interface ProductDetailPageProps {
   params: Promise<{ id: string }>;
@@ -11,8 +11,8 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
   // Await the params since it's now a Promise in Next.js 15+
   const { id } = await params;
 
-  // Find the product by ID
-  const product: Product | undefined = products.find((p) => p.id === id);
+  // Fetch the product from Firestore
+  const product = await getProductById(id);
 
   if (!product) {
     return (

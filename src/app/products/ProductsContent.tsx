@@ -2,22 +2,33 @@
 
 import { useSearchParams } from "next/navigation";
 import { Phone, MessageCircle } from "lucide-react";
-import { products, type Product } from "@/data/products";
 import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "../context/CartContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getAllProducts, FullProduct } from "@/lib/products";
 
 interface ProductRowProps {
-  product: Product;
-  addToCart: (product: Product, qty: number) => void;
+  product: FullProduct;
+  addToCart?: (product: FullProduct, qty: number) => void;
 }
 
 export default function ProductsContent() {
   const [notification, setNotification] = useState<string | null>(null);
+  const [products, setProducts] = useState<FullProduct[]>([]);
+  const [loading, setLoading] = useState(true);
   const searchParams = useSearchParams();
   const category = searchParams.get("cat");
   const { addToCart } = useCart();
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const data = await getAllProducts();
+      setProducts(data);
+      setLoading(false);
+    };
+    fetchProducts();
+  }, []);
 
   // Map category codes to readable names
   const categoryMap: Record<string, string> = {
@@ -28,26 +39,39 @@ export default function ProductsContent() {
     vss: "VSS",
   };
 
-  // Coming Soon categories
-  if (category === "m20" || category === "vsr") {
+  if (loading) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <h1 className="text-3xl font-bold mb-4">Coming Soon!</h1>
-        <p className="text-gray-600 text-lg mb-6">
-          The {categoryMap[category]} series will be available soon. Stay tuned!
-        </p>
-        <Link
-          href="/series"
-          className="inline-block bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700 transition"
-        >
-          Browse Other Series
-        </Link>
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
       </div>
     );
   }
 
+  // Coming Soon categories - check if no products exist
+  if (category === "m20" || category === "vsr") {
+    const hasProducts = products.some((p) => p.category === category);
+    if (!hasProducts) {
+      return (
+        <div className="container mx-auto px-4 py-16 text-center">
+          <h1 className="text-3xl font-bold mb-4">Coming Soon!</h1>
+          <p className="text-gray-600 text-lg mb-6">
+            The {categoryMap[category]} series will be available soon. Stay tuned!
+          </p>
+          <Link
+            href="/series"
+            className="inline-block bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700 transition"
+          >
+            Browse Other Series
+          </Link>
+        </div>
+      );
+    }
+  }
+
   // Filter products
-  let filteredProducts: Product[] = products;
+  let filteredProducts: FullProduct[] = products;
   let categoryName = "All Products";
 
   if (category && category in categoryMap) {
@@ -65,11 +89,11 @@ export default function ProductsContent() {
     );
   }
 
-  // take first product for shared info
+  // Get category info from first product (which has merged category data)
   const categoryInfo = filteredProducts[0];
 
-  const handleAddToCart = (product: Product, qty: number) => {
-    addToCart(product, qty);
+  const handleAddToCart = (product: FullProduct, qty: number) => {
+    addToCart(product as any, qty);
     setNotification(`${product.model} (${qty}) added to cart!`);
     setTimeout(() => setNotification(null), 3000);
   };
@@ -103,7 +127,7 @@ export default function ProductsContent() {
         </p>
         <div className="max-w-lg mx-auto w-full h-auto rounded shadow overflow-hidden">
           <Image
-            src={categoryInfo.image}
+            src={categoryInfo.image || "/img/vsx10 Medium.png"}
             alt={categoryName}
             width={500}
             height={300}
@@ -218,9 +242,9 @@ export default function ProductsContent() {
 }
 
 // Separate row component with qty state
-function ProductRow({ product, addToCart }: ProductRowProps) {
-  const [qty, setQty] = useState(1);
-const getFinalPrice = (price: number | string): number => {
+function ProductRow({ product }: ProductRowProps) {
+  // const [qty, setQty] = useState(1); // Uncomment when cart is enabled
+  const getFinalPrice = (price: number | string): number => {
   const num = Number(price);
   if (isNaN(num)) return 0;
 

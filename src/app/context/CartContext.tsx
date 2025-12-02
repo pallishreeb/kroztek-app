@@ -1,14 +1,24 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { Product } from "@/data/products"; // ✅ Import your Product type
 
-// CartItem uses Product instead of any
-type CartItem = { product: Product; quantity: number };
+// Generic cart product type - works with both static and Firestore products
+export type CartProduct = {
+  id: string;
+  name: string;
+  price: number | string;
+  image?: string;
+  model?: string;
+  gst?: string;
+  category?: string;
+};
+
+// CartItem uses CartProduct
+type CartItem = { product: CartProduct; quantity: number };
 
 type CartContextType = {
   cart: CartItem[];
-  addToCart: (product: Product, qty?: number) => void;
+  addToCart: (product: CartProduct, qty?: number) => void;
   removeFromCart: (id: string) => void;
   clearCart: () => void;
 };

@@ -1,12 +1,13 @@
 "use client";
 
-import { Product } from "@/data/products";
+import { FullProduct } from "@/lib/products";
 import Link from "next/link";
 import { useState } from "react";
 import { useCart } from "../../context/CartContext";
+import ProductViewTracker from "@/components/ProductViewTracker";
 
 type Props = {
-  product: Product;
+  product: FullProduct;
 };
 
 export default function ProductDetailClient({ product }: Props) {
@@ -29,6 +30,13 @@ export default function ProductDetailClient({ product }: Props) {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Track product view */}
+      <ProductViewTracker
+        productId={product.id}
+        productName={product.name}
+        category={product.category}
+      />
+
       {/* Breadcrumb */}
       <nav className="text-sm text-gray-600 mb-6">
         <ol className="flex space-x-2">

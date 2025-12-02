@@ -1,7 +1,9 @@
 "use client";
 import Link from "next/link";
 import { Eye } from "lucide-react";
-import { products } from "@/data/products";
+import { useEffect, useState } from "react";
+import { getAllProducts, FullProduct } from "@/lib/products";
+import { DEFAULT_CATEGORIES } from "@/types/category";
 
 // Map category codes to readable names
 const categoryMap: Record<string, string> = {
@@ -13,12 +15,33 @@ const categoryMap: Record<string, string> = {
 };
 
 export default function SeriesGrid() {
-  const categoryOrder = ["vsx", "vss", "vsm", "vsr","m20" ];
+  const [products, setProducts] = useState<FullProduct[]>([]);
+  const [loading, setLoading] = useState(true);
 
-const uniqueSeries = categoryOrder.filter((cat) =>
-  products.some((p) => p.category === cat)
-);
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const data = await getAllProducts();
+      setProducts(data);
+      setLoading(false);
+    };
+    fetchProducts();
+  }, []);
 
+  const categoryOrder = ["vsx", "vss", "vsm", "vsr", "m20"];
+  const uniqueSeries = categoryOrder.filter((cat) =>
+    products.some((p) => p.category === cat)
+  );
+
+  if (loading) {
+    return (
+      <div className="px-4 py-8 bg-gray-50">
+        <h2 className="text-2xl font-bold mb-6 text-center">CG Emotron Series</h2>
+        <div className="flex items-center justify-center h-48">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="px-4 py-8 bg-gray-50">
@@ -29,6 +52,7 @@ const uniqueSeries = categoryOrder.filter((cat) =>
         {uniqueSeries.map((cat) => {
           const seriesProducts = products.filter((p) => p.category === cat);
           const firstProduct = seriesProducts[0];
+          const categoryData = DEFAULT_CATEGORIES[cat as keyof typeof DEFAULT_CATEGORIES];
           const categoryName = categoryMap[cat] || cat;
 
           return (
@@ -40,7 +64,7 @@ const uniqueSeries = categoryOrder.filter((cat) =>
               {/* Image wrapper */}
               <div className="relative w-full h-48 flex items-center justify-center bg-gray-100">
                 <img
-                  src={firstProduct.image}
+                  src={firstProduct?.image || categoryData?.image || "/img/vsx10 Medium.png"}
                   alt={categoryName}
                   className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
                 />
@@ -61,7 +85,7 @@ const uniqueSeries = categoryOrder.filter((cat) =>
                   <p className="text-sm text-gray-700">{firstProduct.rangeA}</p>
                 )}
                 <p className="text-sm text-gray-600 line-clamp-2">
-                  {firstProduct.description}
+                  {firstProduct?.description || categoryData?.description}
                 </p>
               </div>
             </Link>

@@ -1,15 +1,15 @@
 import Link from "next/link";
-import { Product } from "@/data/products";
+import { FullProduct } from "@/lib/products";
 import { Eye } from "lucide-react";
 
-export default function ProductCard({ product }: { product: Product }) {
+export default function ProductCard({ product }: { product: FullProduct }) {
   return (
     <Link href={`/products/${product.id}`}>
       <div className="bg-white rounded-xl overflow-hidden cursor-pointer flex flex-col shadow-sm hover:shadow-md transition">
         {/* Image */}
         <div className="w-full h-48">
           <img
-            src={product.image}
+            src={product.image || "/img/vsx10 Medium.png"}
             alt={product.name}
             className="w-full h-full object-cover rounded-t-xl"
           />

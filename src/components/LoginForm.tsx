@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useAuth } from "../app/context/AuthContext";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function AuthForm() {
   const [mode, setMode] = useState<"login" | "reset" | "magic">("login");
@@ -13,6 +13,10 @@ export default function AuthForm() {
   const [loading, setLoading] = useState(false);
   const { login, resetPassword, sendMagicLink } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Get redirect URL from query params, default to home
+  const redirectUrl = searchParams.get("redirect") || "/";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,7 +27,7 @@ export default function AuthForm() {
     try {
       if (mode === "login") {
         await login(email, password);
-        router.push("/");
+        router.push(redirectUrl);
       } else if (mode === "reset") {
         await resetPassword(email);
         setSuccess("Password reset email sent! Check your inbox.");

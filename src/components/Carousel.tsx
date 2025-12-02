@@ -1,84 +1,54 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, ArrowRight, ShoppingBag, Pause, Play } from "lucide-react";
+import { getActiveSlides, DEFAULT_SLIDES } from "@/lib/carousel";
+import { CarouselSlide } from "@/types/carousel";
 
-const slides = [
-  { 
-    id: 1, 
-    image: "/banner1.jpg", 
-    title: "Authorized Dealer",
-    subtitle: "CG Emotron Industrial Solutions",
-    description: "Premium quality drives and automation solutions for your industrial needs",
-    type: "banner"
-  },
-  { 
-    id: 2, 
-    image: "/banner2.jpg", 
-    title: "Industrial Drives",
-    subtitle: "Shaft Power Solutions",
-    description: "Advanced motor control systems and power transmission solutions",
-    type: "banner"
-  },
-  { 
-    id: 3, 
-    image: "/banner5.jpg", 
-    title: "Reliable Service",
-    subtitle: "24/7 Support & Maintenance",
-    description: "Expert technical support and comprehensive maintenance services",
-    type: "banner"
-  },
-  { id: 4, image: "/cg1.png", title: "CG Emotron Products", subtitle: "Industrial Automation", description: "Explore our range of products", type: "logo" },
-  { id: 5, image: "/cg2.png", title: "CG Emotron Products", subtitle: "Industrial Automation", description: "Explore our range of products", type: "logo" },
-  { id: 6, image: "/cg3.png", title: "CG Emotron Products", subtitle: "Industrial Automation", description: "Explore our range of products", type: "logo" },
-  { id: 7, image: "/cg4.png", title: "CG Emotron Products", subtitle: "Industrial Automation", description: "Explore our range of products", type: "logo" },
-  { id: 8, image: "/cg5.png", title: "CG Emotron Products", subtitle: "Industrial Automation", description: "Explore our range of products", type: "logo" },
-  { id: 9, image: "/cg6.png", title: "CG Emotron Products", subtitle: "Industrial Automation", description: "Explore our range of products", type: "logo" },
-  { id: 10, image: "/cg7.png", title: "CG Emotron Products", subtitle: "Industrial Automation", description: "Explore our range of products", type: "logo" },
-  { id: 11, image: "/cg8.png", title: "CG Emotron Products", subtitle: "Industrial Automation", description: "Explore our range of products", type: "logo" },
-  { id: 12, image: "/cg9.png", title: "CG Emotron Products", subtitle: "Industrial Automation", description: "Explore our range of products", type: "logo" },
-  { id: 13, image: "/cg10.png", title: "CG Emotron Products", subtitle: "Industrial Automation", description: "Explore our range of products", type: "logo" },
-  { id: 14, image: "/cg11.png", title: "CG Emotron Products", subtitle: "Industrial Automation", description: "Explore our range of products", type: "logo" },
-  { id: 15, image: "/cg12.png", title: "CG Emotron Products", subtitle: "Industrial Automation", description: "Explore our range of products", type: "logo" },
-  { id: 16, image: "/cg13.png", title: "CG Emotron Products", subtitle: "Industrial Automation", description: "Explore our range of products", type: "logo" },
-  { id: 17, image: "/cg14.png", title: "CG Emotron Products", subtitle: "Industrial Automation", description: "Explore our range of products", type: "logo" },
-  { id: 18, image: "/cg15.png", title: "CG Emotron Products", subtitle: "Industrial Automation", description: "Explore our range of products", type: "logo" },
-  { id: 19, image: "/cg16.png", title: "CG Emotron Products", subtitle: "Industrial Automation", description: "Explore our range of products", type: "logo" },
-  { id: 20, image: "/cg17.png", title: "CG Emotron Products", subtitle: "Industrial Automation", description: "Explore our range of products", type: "logo" },
-  { id: 21, image: "/cg18.png", title: "CG Emotron Products", subtitle: "Industrial Automation", description: "Explore our range of products", type: "logo" },
-  { id: 22, image: "/cg19.png", title: "CG Emotron Products", subtitle: "Industrial Automation", description: "Explore our range of products", type: "logo" },
-  { id: 23, image: "/cg20.png", title: "CG Emotron Products", subtitle: "Industrial Automation", description: "Explore our range of products", type: "logo" },
-  { id: 24, image: "/cg21.png", title: "CG Emotron Products", subtitle: "Industrial Automation", description: "Explore our range of products", type: "logo" },
-  { id: 25, image: "/cg22.png", title: "CG Emotron Products", subtitle: "Industrial Automation", description: "Explore our range of products", type: "logo" },
-  { id: 26, image: "/cg23.png", title: "CG Emotron Products", subtitle: "Industrial Automation", description: "Explore our range of products", type: "logo" },
-  { id: 27, image: "/cg24.png", title: "CG Emotron Products", subtitle: "Industrial Automation", description: "Explore our range of products", type: "logo" },
-  { id: 28, image: "/cg25.png", title: "CG Emotron Products", subtitle: "Industrial Automation", description: "Explore our range of products", type: "logo" },
-  { id: 29, image: "/cg26.png", title: "CG Emotron Products", subtitle: "Industrial Automation", description: "Explore our range of products", type: "logo" },
-  { id: 30, image: "/cg27.png", title: "CG Emotron Products", subtitle: "Industrial Automation", description: "Explore our range of products", type: "logo" },
-];
 
 export default function Carousel() {
+  const [slides, setSlides] = useState<CarouselSlide[]>(DEFAULT_SLIDES);
   const [current, setCurrent] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [loading, setLoading] = useState(true);
 
+  // Fetch slides from Firestore
   useEffect(() => {
-    if (isPaused) return;
+    const fetchSlides = async () => {
+      try {
+        const firestoreSlides = await getActiveSlides();
+        if (firestoreSlides.length > 0) {
+          setSlides(firestoreSlides);
+        }
+      } catch (error) {
+        console.error("Error fetching carousel slides:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSlides();
+  }, []);
+
+  // single nextSlide function (useCallback so interval can use stable ref)
+  const nextSlide = useCallback(() => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+    setCurrent((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
+    setTimeout(() => setIsTransitioning(false), 500);
+  }, [isTransitioning, slides.length]);
+
+  // autoplay interval
+  useEffect(() => {
+    if (isPaused || loading) return;
     const interval = setInterval(nextSlide, 5000);
     return () => clearInterval(interval);
-  }, [current, isPaused]);
+  }, [isPaused, loading, nextSlide]);
 
   const prevSlide = () => {
     if (isTransitioning) return;
     setIsTransitioning(true);
     setCurrent((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
-    setTimeout(() => setIsTransitioning(false), 500);
-  };
-
-  const nextSlide = () => {
-    if (isTransitioning) return;
-    setIsTransitioning(true);
-    setCurrent((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
     setTimeout(() => setIsTransitioning(false), 500);
   };
 
@@ -90,8 +60,7 @@ export default function Carousel() {
   };
 
   const currentSlide = slides[current];
-  const isLogoSlide = currentSlide.type === "logo";
-
+  const isLogoSlide = currentSlide?.type === "logo";
   return (
     <div className="relative w-full h-[40vh] sm:h-[45vh] md:h-[50vh] lg:h-[55vh] overflow-hidden rounded-xl md:rounded-2xl shadow-2xl bg-gray-100">
       {slides.map((slide, index) => (
@@ -142,13 +111,13 @@ export default function Carousel() {
 
                     <div className="flex flex-col sm:flex-row gap-3">
                       <Link
-                        href="/series"
+                        href={slide.buttonLink || "/series"}
                         className="group bg-white text-gray-900 font-semibold py-2.5 sm:py-3 px-5 sm:px-6 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 inline-flex items-center justify-center gap-2 hover:bg-gray-100"
                       >
-                        <span className="text-sm sm:text-base">Browse Products</span>
+                        <span className="text-sm sm:text-base">{slide.buttonText || "Browse Products"}</span>
                         <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
                       </Link>
-                      
+
                       <Link
                         href="/guide-to-buy"
                         className="group border-2 border-white/30 text-white font-semibold py-2.5 sm:py-3 px-5 sm:px-6 rounded-lg transition-all duration-300 inline-flex items-center justify-center gap-2 hover:bg-white/10 backdrop-blur-sm"
