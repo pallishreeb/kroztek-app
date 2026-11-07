@@ -123,7 +123,7 @@ export default function ProductsContent() {
                 <th className="p-3 border">Model Name</th>
                 <th className="p-3 border">KW / HP</th>
                 <th className="p-3 border">Current</th>
-                <th className="p-3 border">Price</th>
+                {/* <th className="p-3 border">Price</th> */}
                 <th className="p-3 border">Contact to Buy</th>
                 {/* <th className="p-3 border">Quantity</th>
                 <th className="p-3 border">Action</th> */}
@@ -241,9 +241,9 @@ const getFinalPrice = (price: number | string): number => {
           {typeof product.kw === 'string' ? product.kw : `${product.kw}`} kW / {typeof product.hp === 'string' ? product.hp : `${product.hp}`} HP
         </td>
         <td className="p-3 border">{typeof product.amps === 'string' ? product.amps : `${product.amps}`} A</td>
-        <td className="p-3 border">
+        {/* <td className="p-3 border">
           Rs.{getFinalPrice(product.price)} + {product.gst}% GST
-        </td>
+        </td> */}
          {/* Action Buttons */}
   <td className="p-3 border text-center space-x-3">
     {/* Call Button */}
@@ -256,20 +256,23 @@ const getFinalPrice = (price: number | string): number => {
     </a>
 
     {/* WhatsApp Button */}
-<a
-  href={`https://wa.me/918637214899?text=${encodeURIComponent(
-    `Hello Kroztek Team 👋,
-I'm interested in the ${product.model} (${product.kw} kW / ${product.hp} HP) model.
-Price mentioned: Rs.${getFinalPrice(product.price)} + ${product.gst}% GST per unit.
-Thank you!`
-  )}`}
-  target="_blank"
-  rel="noopener noreferrer"
-  className="inline-flex items-center justify-center p-2 bg-green-50 text-green-600 rounded-full hover:bg-green-100 transition-colors"
-  title="WhatsApp enquiry"
->
-  <MessageCircle size={18} />
-</a>
+    <a
+      href={`https://wa.me/918637214899?text=${encodeURIComponent(
+        `Hello Kroztek Team 👋,
+
+    I'm interested in the ${product.model} (${product.kw} kW / ${product.hp} HP) model.
+
+    Please share the pricing and availability.
+
+    Thank you!`
+      )}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-center justify-center p-2 bg-green-50 text-green-600 rounded-full hover:bg-green-100 transition-colors"
+      title="WhatsApp enquiry"
+    >
+      <MessageCircle size={18} />
+    </a>
 
   </td>
         {/* <td className="p-3 border">
@@ -293,7 +296,7 @@ Thank you!`
 
       {/* Mobile Card Layout */}
       <tr className="md:hidden">
-        <td colSpan={6} className="p-0">
+        <td colSpan={4} className="p-0"> {/* colSpan={6} with price */}
           <div className="p-4 border-b bg-gray-50 hover:bg-gray-100">
             <div className="space-y-3">
               <h3 className="font-semibold text-lg">{product.model}</h3>
@@ -305,9 +308,9 @@ Thank you!`
                 <div>{typeof product.amps === 'string' ? product.amps : `${product.amps}`} A</div>
               </div>
 
-              <div className="text-lg font-medium text-gray-900">
+              {/* <div className="text-lg font-medium text-gray-900">
                 Rs.{getFinalPrice(product.price)} + {product.gst}% GST
-              </div>
+              </div> */}
 
               {/* <div className="flex items-center justify-between pt-2">
                 <div className="flex items-center gap-2">

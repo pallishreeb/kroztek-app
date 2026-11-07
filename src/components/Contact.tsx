@@ -1,13 +1,16 @@
 /** @format */
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Phone, Mail, MapPin, CheckCircle2, XCircle } from "lucide-react";
+import ReCAPTCHA from "react-google-recaptcha";
 import { submitToSheetKroztek } from "@/utils/submitToSheetKroztek";
 
 export default function ContactSection() {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<"success" | "error" | null>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
+  const captchaRef = useRef<ReCAPTCHA>(null);
   useEffect(() => {
     if (status) {
       const timer = setTimeout(() => setStatus(null), 3000);
@@ -15,17 +18,39 @@ export default function ContactSection() {
     }
   }, [status]);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-    setStatus(null);
 
-    const form = e.currentTarget;
+const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
 
+  const form = e.currentTarget;
+
+  // Honeypot spam check
+  const honeypot = (
+    form.elements.namedItem("website") as HTMLInputElement
+  )?.value;
+
+  if (honeypot) {
+    form.reset();
+    return;
+  }
+
+  // CAPTCHA validation
+  if (!captchaToken) {
+    setStatus("error");
+    return;
+  }
+
+  setLoading(true);
+  setStatus(null);
+
+  try {
     const formData = {
-      name: (form.elements.namedItem("name") as HTMLInputElement)?.value || "",
-      email: (form.elements.namedItem("email") as HTMLInputElement)?.value || "",
-      phone: (form.elements.namedItem("tel") as HTMLInputElement)?.value || "",
+      name:
+        (form.elements.namedItem("name") as HTMLInputElement)?.value || "",
+      email:
+        (form.elements.namedItem("email") as HTMLInputElement)?.value || "",
+      phone:
+        (form.elements.namedItem("tel") as HTMLInputElement)?.value || "",
       companyName:
         (form.elements.namedItem("companyName") as HTMLInputElement)?.value || "",
       foundBy:
@@ -34,8 +59,10 @@ export default function ContactSection() {
         (form.elements.namedItem("message") as HTMLTextAreaElement)?.value || "",
     };
 
-    const result = await submitToSheetKroztek(formData);
-    setLoading(false);
+    const result = await submitToSheetKroztek(
+      formData,
+      captchaToken
+    );
 
     if (result.success) {
       form.reset();
@@ -43,7 +70,16 @@ export default function ContactSection() {
     } else {
       setStatus("error");
     }
-  };
+  } catch (error) {
+    console.error("Contact form error:", error);
+    setStatus("error");
+  } finally {
+    captchaRef.current?.reset();
+    setCaptchaToken(null);
+    setLoading(false);
+  }
+};
+
 
   return (
     <section className="px-4 sm:px-6 lg:px-20 py-12 sm:py-16 lg:py-20">
@@ -75,6 +111,18 @@ export default function ContactSection() {
           {/* Contact Form */}
           <div className="p-8 lg:p-12 relative">
             <form onSubmit={handleSubmit} className="space-y-5 relative pb-10">
+              {/* Honeypot field - spam protection */}
+              <div
+                className="absolute w-0 h-0 overflow-hidden"
+                aria-hidden="true"
+              >
+                <input
+                  type="text"
+                  name="website"
+                  tabIndex={-1}
+                  autoComplete="off"
+                />
+              </div>
               <input
                 name="name"
                 type="text"
@@ -118,7 +166,15 @@ export default function ContactSection() {
                 required
                 className="w-full px-5 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-600 outline-none"
               ></textarea>
-
+              <div className="flex justify-center">
+                <ReCAPTCHA
+                  ref={captchaRef}
+                  sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!}
+                  onChange={(token) => setCaptchaToken(token)}
+                  onExpired={() => setCaptchaToken(null)}
+                  onErrored={() => setCaptchaToken(null)}
+                />
+              </div>
               <button
                 type="submit"
                 disabled={loading}
